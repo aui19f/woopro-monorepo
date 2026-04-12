@@ -3,6 +3,7 @@ import { fileURLToPath } from "url";
 import type { StorybookConfig } from "@storybook/react-vite";
 // Tailwind v4 전용 Vite 플러그인
 import tailwindcss from "@tailwindcss/vite";
+import tsconfigPaths from "vite-tsconfig-paths"; // 1. 플러그인 임포트
 
 // ESM 환경에서 현재 파일의 디렉토리 경로 추출
 const __filename = fileURLToPath(import.meta.url);
@@ -33,6 +34,7 @@ const config: StorybookConfig = {
     // 1. Tailwind CSS v4 엔진 주입
     config.plugins = config.plugins || [];
     config.plugins.push(tailwindcss());
+    config.plugins.push(tsconfigPaths());
 
     // 2. 브라우저 환경에서 process.env 에러 방지
     config.define = {

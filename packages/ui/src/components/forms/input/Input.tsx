@@ -1,9 +1,10 @@
 "use client";
 
 import React from "react";
-import { twMerge } from "tailwind-merge";
-import { formGeometries, FormGeometry } from "../../../types/forms";
+
 import Image from "next/image";
+import { cn } from "@/utils/cn";
+import { formGeometries, FormGeometry } from "@/types/forms";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string;
@@ -37,7 +38,7 @@ export default function Input({
       )}
       <input
         ref={ref}
-        className={twMerge(
+        className={cn(
           "w-full border rounded-md transition-all outline-none focus:ring-2",
           "border-gray-300 focus:border-blue-500 focus:ring-blue-500/20",
           sizeStyles,
