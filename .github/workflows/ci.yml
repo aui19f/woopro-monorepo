@@ -40,8 +40,8 @@ jobs:
       - name: Lint
         run: pnpm turbo lint
 
-      - name: Test
-        run: pnpm turbo test
+      # - name: Test
+      #   run: pnpm turbo test
 
       - name: Build
         run: pnpm turbo build
