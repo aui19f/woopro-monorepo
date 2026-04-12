@@ -3,7 +3,7 @@ name: CI
 # 언제 이 작업을 실행할 것인가?
 on:
   push:
-    branches: ["main"] # main 브랜치에 푸시될 때
+    branches: ["main", "feature/*"] # main 브랜치에 푸시될 때
   pull_request: # 모든 PR이 생성되거나 업데이트될 때
 
 jobs:
