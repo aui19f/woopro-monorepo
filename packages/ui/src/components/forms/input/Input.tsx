@@ -10,7 +10,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   name: string;
   sizing?: FormGeometry;
   isError?: boolean;
-  icon?: React.ReactNode;
+  icon?: string;
   ref?: React.Ref<HTMLInputElement>;
 }
 

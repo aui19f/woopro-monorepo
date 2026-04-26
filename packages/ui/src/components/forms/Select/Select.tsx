@@ -1,16 +1,15 @@
 "use client";
 
-import { SelectHTMLAttributes } from "react";
+import { Ref, SelectHTMLAttributes } from "react";
 import { formGeometries, FormGeometry, FormOption } from "@/types/forms";
-
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: FormOption[];
   sizing?: FormGeometry;
   selected: string;
   isError?: boolean;
-  ref?: React.Ref<HTMLSelectElement>;
+  ref?: Ref<HTMLSelectElement>;
 }
 
 export default function Select({
@@ -32,7 +31,7 @@ export default function Select({
           ref={ref}
           value={selected}
           {...rest}
-          className={twMerge(
+          className={cn(
             "w-full appearance-none transition-all outline-none ",
             "pr-10", // 화살표 아이콘 공간 확보
             sizeStyle,
@@ -52,7 +51,7 @@ export default function Select({
         {/* 커스텀 화살표 아이콘 */}
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
           <svg
-            className={twMerge(
+            className={cn(
               "w-5 h-5 transition-colors",
               isError ? "text-error" : "text-slate-400"
             )}

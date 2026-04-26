@@ -94,7 +94,7 @@ export const switchGeometries = {
 // 3. 타입 추출
 export type FormPalette = keyof typeof formPalettes;
 export type FormGeometry = keyof typeof formGeometries;
-export type selectionGeometry = keyof typeof selectionGeometries;
+export type SelectionGeometry = keyof typeof selectionGeometries;
 
 export interface FormOption {
   id: string;

@@ -1,5 +1,7 @@
+"use client";
+
 import { FormGeometry, selectionGeometries } from "@/types/forms";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
 interface RatingProps {
   value: number;
@@ -23,7 +25,7 @@ export default function Rating({
           key={i}
           type="button"
           onClick={() => onChange(i + 1)}
-          className={twMerge(
+          className={cn(
             "transition-transform active:scale-90",
             i < value ? "text-secondary" : "text-slate-300"
           )}

@@ -2,14 +2,14 @@
 
 import Image from "next/image";
 import { ChangeEvent, useId, useRef } from "react";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 import { FormGeometry, imageGeometries } from "@/types/forms";
 
 interface ImageUploaderProps {
   previews: string[];
   onImageChange: (files: FileList) => void;
   onRemove: (index: number) => void;
-  sizing?: FormGeometry; // sizing 추가
+  sizing?: FormGeometry;
   maxCount?: number;
   className?: string;
 }
@@ -22,7 +22,7 @@ export default function ImageUploader({
   maxCount = 5,
   className,
 }: ImageUploaderProps) {
-  const generatedId = useId(); // 컴포넌트 인스턴스마다 고유한 ID 생성
+  const generatedId = useId();
   const inputId = `image-upload-${generatedId}`;
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,12 +36,11 @@ export default function ImageUploader({
   };
 
   return (
-    <div className={twMerge("flex flex-wrap gap-3", className)}>
-      {/* 1. 이미지 미리보기 리스트 */}
+    <div className={cn("flex flex-wrap gap-3", className)}>
       {previews.map((src, i) => (
         <div
           key={`${src}-${i}`}
-          className={twMerge("relative flex-shrink-0 group", styles.box)}
+          className={cn("relative flex-shrink-0 group", styles.box)}
         >
           <Image
             src={src}
@@ -49,11 +48,10 @@ export default function ImageUploader({
             fill
             className="object-cover rounded-xl border border-slate-200"
           />
-          {/* 삭제 버튼: 사이즈에 따른 크기 조절 */}
           <button
             type="button"
             onClick={() => onRemove(i)}
-            className={twMerge(
+            className={cn(
               "absolute -top-1.5 -right-1.5 flex items-center justify-center text-white transition-all bg-slate-800 rounded-full shadow-lg hover:bg-red-500 active:scale-90",
               styles.removeBtn
             )}
@@ -76,10 +74,10 @@ export default function ImageUploader({
         </div>
       ))}
 
-      {/* 2. 업로드 버튼 */}
       {previews.length < maxCount && (
         <label
-          className={twMerge(
+          htmlFor={inputId}
+          className={cn(
             "flex flex-col items-center justify-center transition-all border-2 border-dashed rounded-xl cursor-pointer hover:bg-blue-50",
             styles.box,
             "border-slate-300 hover:border-point text-slate-400 hover:text-point"
@@ -96,7 +94,7 @@ export default function ImageUploader({
             aria-label="이미지 업로드"
           />
           <svg
-            className={twMerge("mb-1", styles.icon)}
+            className={cn("mb-1", styles.icon)}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -108,7 +106,7 @@ export default function ImageUploader({
               d="M12 4v16m8-8H4"
             />
           </svg>
-          <div className={twMerge("flex font-medium", styles.textSize)}>
+          <div className={cn("flex font-medium", styles.textSize)}>
             <span className={previews.length > 0 ? "text-point" : ""}>
               {previews.length}
             </span>

@@ -2,7 +2,7 @@
 
 import { useRef, useEffect, useImperativeHandle } from "react";
 import { formGeometries, FormGeometry } from "@/types/forms";
-import { twMerge } from "tailwind-merge";
+import { cn } from "@/utils/cn";
 
 interface TextareaProps
   extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -27,14 +27,12 @@ export default function Textarea({
   const innerRef = useRef<HTMLTextAreaElement>(null);
   const sizeStyle = formGeometries[sizing];
 
-  // React 19에서 외부 ref와 내부 ref를 연결 (필요 시)
-  useImperativeHandle(ref, () => innerRef.current!);
+  useImperativeHandle(ref, () => innerRef.current ?? document.createElement("textarea"));
 
   useEffect(() => {
     if (autoResize && innerRef.current) {
       const el = innerRef.current;
       el.style.height = "auto";
-      // scrollHeight를 이용해 높이 재설정
       el.style.height = `${el.scrollHeight}px`;
     }
   }, [value, autoResize]);
@@ -47,7 +45,7 @@ export default function Textarea({
         value={value}
         onChange={onChange}
         {...rest}
-        className={twMerge(
+        className={cn(
           "w-full transition-all outline-none",
           "focus:border-blue-500",
           sizeStyle,
