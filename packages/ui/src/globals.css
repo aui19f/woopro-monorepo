@@ -5,13 +5,6 @@
   --foreground: #171717;
 }
 
-@theme {
-  --color-point: #150a38;
-  --color-secondary: #f2a73b;
-  --color-accent: #b7d7bb;
-  --color-error: #d62718;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -46,7 +39,7 @@ h6 {
   .input,
   textarea,
   select {
-    @apply bg-slate-50 border border-slate-300 placeholder:text-slate-200 focus:border-blue-400;
+    @apply bg-slate-50 border border-slate-300 placeholder:text-slate-200 h-12;
   }
   input,
   textarea,

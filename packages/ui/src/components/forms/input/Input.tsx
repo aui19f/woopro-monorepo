@@ -15,7 +15,6 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export default function Input({
-  name,
   className,
   sizing = "md",
   isError,
@@ -30,7 +29,7 @@ export default function Input({
         <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors">
           <Image
             src={`/images/icons/${icon}.png`}
-            alt={name}
+            alt={props.name || "-"}
             width={24}
             height={24}
           />

@@ -4,8 +4,7 @@ import { useRef, useEffect, useImperativeHandle } from "react";
 import { formGeometries, FormGeometry } from "@/types/forms";
 import { cn } from "@/utils/cn";
 
-interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   name: string;
   sizing?: FormGeometry;
   autoResize?: boolean;
@@ -27,7 +26,10 @@ export default function Textarea({
   const innerRef = useRef<HTMLTextAreaElement>(null);
   const sizeStyle = formGeometries[sizing];
 
-  useImperativeHandle(ref, () => innerRef.current ?? document.createElement("textarea"));
+  useImperativeHandle(
+    ref,
+    () => innerRef.current ?? document.createElement("textarea")
+  );
 
   useEffect(() => {
     if (autoResize && innerRef.current) {

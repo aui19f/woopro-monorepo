@@ -1,0 +1,27 @@
+{
+  "name": "@repo/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./common": "./src/common.ts",
+    "./regex": "./src/regex.ts",
+    "./apply": "./src/apply.ts",
+    "./formatters": "./src/formatters.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0"
+  },
+  "peerDependencies": {
+    "zod": "^3.0.0"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.39.1",
+    "typescript": "5.9.2",
+    "zod": "^3.24.0"
+  }
+}
