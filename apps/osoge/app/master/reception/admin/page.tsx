@@ -13,11 +13,12 @@ function getTodayKST() {
     day: "numeric",
     weekday: "long",
   });
-  return { date, display };
+  const iso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  return { date, display, iso };
 }
 
 export default async function AdminPage() {
-  const { date, display } = getTodayKST();
+  const { date, display, iso } = getTodayKST();
   const todayCount = await countTodayReceptions(date);
-  return <AdminReception todayCount={todayCount} today={display} />;
+  return <AdminReception todayCount={todayCount} today={display} todayISO={iso} />;
 }

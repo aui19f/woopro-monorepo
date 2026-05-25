@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { formatPhone } from "@repo/schemas/formatters";
 import { phoneRegex } from "@repo/schemas/regex";
-import { adminRegisterReception, type ReceptionState } from "../actions";
+import { adminRegisterReception, getCountByDate, type ReceptionState } from "../actions";
 
 const INITIAL_DIGITS = "010";
 
@@ -21,6 +21,7 @@ type PaymentTiming = "PREPAID" | "POSTPAID";
 interface Props {
   todayCount: number;
   today: string;
+  todayISO: string;
 }
 
 function maskPhone(formatted: string): string {
@@ -28,15 +29,30 @@ function maskPhone(formatted: string): string {
   return `010-****-${parts[2] ?? ""}`;
 }
 
-export default function AdminReception({ todayCount, today }: Props) {
+function isoToYYYYMMDD(iso: string) {
+  return iso.replace(/-/g, "");
+}
+
+function isoToDisplay(iso: string) {
+  return new Date(iso + "T00:00:00").toLocaleDateString("ko-KR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  });
+}
+
+export default function AdminReception({ todayCount, today, todayISO }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const [digits, setDigits] = useState(INITIAL_DIGITS);
   const [quantity, setQuantity] = useState("1");
   const [amount, setAmount] = useState("");
   const [paymentTiming, setPaymentTiming] = useState<PaymentTiming | null>(null);
   const [hideMiddle, setHideMiddle] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(todayISO);
   const [count, setCount] = useState(todayCount);
 
   const [state, formAction, isPending] = useActionState<ReceptionState, FormData>(
@@ -47,6 +63,8 @@ export default function AdminReception({ todayCount, today }: Props) {
   const formatted = formatPhone(digits);
   const isValid = phoneRegex.test(formatted);
   const storedPhone = hideMiddle && isValid ? maskPhone(formatted) : formatted;
+  const dateYYYYMMDD = isoToYYYYMMDD(selectedDate);
+  const displayDate = isoToDisplay(selectedDate);
 
   const handleKey = (key: Key) => {
     if (key === "clear") {
@@ -64,10 +82,21 @@ export default function AdminReception({ todayCount, today }: Props) {
     setAmount(num === "" ? "" : num.toLocaleString("ko-KR"));
   };
 
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.value) return;
+    setSelectedDate(e.target.value);
+  };
+
   const handleSubmit = () => {
     formRef.current?.requestSubmit();
   };
 
+  // 날짜 변경 시 해당 날짜 접수 수량 갱신
+  useEffect(() => {
+    getCountByDate(dateYYYYMMDD).then(setCount);
+  }, [dateYYYYMMDD]);
+
+  // 등록 성공 시 초기화
   useEffect(() => {
     if (state?.status === 200) {
       setCount((c) => c + 1);
@@ -84,6 +113,7 @@ export default function AdminReception({ todayCount, today }: Props) {
       {/* 서버 액션 hidden form */}
       <form ref={formRef} action={formAction} className="sr-only" aria-hidden>
         <input name="phone" value={storedPhone} readOnly />
+        <input name="date" value={dateYYYYMMDD} readOnly />
         <input name="quantity" value={quantity} readOnly />
         <input name="amount" value={amount} readOnly />
         <input name="paymentTiming" value={paymentTiming ?? ""} readOnly />
@@ -91,14 +121,34 @@ export default function AdminReception({ todayCount, today }: Props) {
 
       <div className="h-screen overflow-hidden flex flex-col bg-slate-50 select-none">
 
-        {/* 헤더: 날짜 + 접수 수량 */}
+        {/* 헤더: 날짜(수정 가능) + 접수 수량 */}
         <div className="flex items-center justify-between px-5 pt-6 pb-4 bg-white border-b border-slate-100">
           <div>
             <p className="text-xs text-slate-400 font-medium">관리자 접수 모드</p>
-            <p className="text-base font-semibold text-slate-700 mt-0.5">{today}</p>
+            {/* 날짜 탭 → 네이티브 데이트피커 */}
+            <div
+              className="relative mt-0.5 cursor-pointer"
+              onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
+            >
+              <p className="text-base font-semibold text-slate-700 flex items-center gap-1.5 pr-1">
+                {displayDate}
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </p>
+              <input
+                ref={dateInputRef}
+                type="date"
+                value={selectedDate}
+                onChange={handleDateChange}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full"
+                tabIndex={-1}
+              />
+            </div>
           </div>
           <div className="text-right">
-            <p className="text-xs text-slate-400">오늘 접수</p>
+            <p className="text-xs text-slate-400">접수</p>
             <p className="text-2xl font-bold text-point">
               {count}
               <span className="text-sm font-normal text-slate-400 ml-1">건</span>
@@ -110,7 +160,6 @@ export default function AdminReception({ todayCount, today }: Props) {
         <div className="px-5 py-4 bg-white mt-2">
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs text-slate-400">입력된 번호</p>
-            {/* 뒷자리만 저장 체크박스 */}
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="checkbox"

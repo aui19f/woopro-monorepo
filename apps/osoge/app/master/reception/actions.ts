@@ -80,6 +80,10 @@ function getTodayKST() {
   return { date, time };
 }
 
+export async function getCountByDate(dateYYYYMMDD: string): Promise<number> {
+  return countTodayReceptions(dateYYYYMMDD);
+}
+
 export async function adminRegisterReception(
   _prev: ReceptionState,
   formData: FormData
@@ -99,7 +103,10 @@ export async function adminRegisterReception(
     return { status: 400, message: "올바른 전화번호를 입력해주세요." };
   }
 
-  const { date, time } = getTodayKST();
+  const rawDate = formData.get("date") as string;
+  const { date: todayDate, time } = getTodayKST();
+  const date = /^\d{8}$/.test(rawDate) ? rawDate : todayDate;
+
   const count = await countTodayReceptions(date);
   const id = `${date}${String(count + 1).padStart(3, "0")}`;
 
