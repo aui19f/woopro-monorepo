@@ -36,21 +36,38 @@ const STATUS_STYLE: Record<ReceptionStatus, string> = {
 const DATE_FILTERS = [
   { value: "today", label: "오늘" },
   { value: "week", label: "일주일" },
-  { value: "month", label: "한달" },
+
   { value: "custom", label: "월지정" },
   { value: "all", label: "전체" },
 ] as const;
 
 const STATUSES: { value: ReceptionStatus; label: string; active: string }[] = [
-  { value: "READY",       label: "준비", active: "bg-blue-100 text-blue-600 border-blue-300" },
-  { value: "IN_PROGRESS", label: "진행", active: "bg-yellow-100 text-yellow-700 border-yellow-300" },
-  { value: "DONE",        label: "완료", active: "bg-green-100 text-green-700 border-green-300" },
-  { value: "CANCELLED",   label: "취소", active: "bg-red-100 text-red-600 border-red-300" },
+  {
+    value: "READY",
+    label: "준비",
+    active: "bg-blue-100 text-blue-600 border-blue-300",
+  },
+  {
+    value: "IN_PROGRESS",
+    label: "진행",
+    active: "bg-yellow-100 text-yellow-700 border-yellow-300",
+  },
+  {
+    value: "DONE",
+    label: "완료",
+    active: "bg-green-100 text-green-700 border-green-300",
+  },
+  {
+    value: "CANCELLED",
+    label: "취소",
+    active: "bg-red-100 text-red-600 border-red-300",
+  },
 ];
 
 function maskPhone(phone: string) {
-  return phone.replace(/(\d{3})-(\d{3,4})-(\d{4})/, (_, p1, p2, p3) =>
-    `${p1}-${"*".repeat(p2.length)}-${p3}`
+  return phone.replace(
+    /(\d{3})-(\d{3,4})-(\d{4})/,
+    (_, p1, p2, p3) => `${p1}-${"*".repeat(p2.length)}-${p3}`
   );
 }
 
@@ -92,10 +109,12 @@ function MonthPicker({
   const options = useMemo(() => {
     const list: { value: string; label: string }[] = [];
     const today = new Date();
-    const [startYear, startMonth] = SERVICE_START_MONTH.split("-").map(Number) as [number, number];
+    const [startYear, startMonth] = SERVICE_START_MONTH.split("-").map(
+      Number
+    ) as [number, number];
     const start = new Date(startYear, startMonth - 1, 1);
 
-    let cur = new Date(today.getFullYear(), today.getMonth(), 1);
+    const cur = new Date(today.getFullYear(), today.getMonth(), 1);
     while (cur >= start) {
       const val = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}`;
       const label = `${cur.getFullYear()}년 ${cur.getMonth() + 1}월`;
@@ -193,8 +212,9 @@ export default function ReceptionView({
   }, [receptions, search]);
 
   // 현재 선택된 필터 요약 텍스트
-  const dateLabel = DATE_FILTERS.find((f) => f.value === localDateFilter)?.label
-    ?? (localDateFilter === "custom" ? localMonth.replace("-", "년 ") + "월" : "");
+  const dateLabel =
+    DATE_FILTERS.find((f) => f.value === localDateFilter)?.label ??
+    (localDateFilter === "custom" ? localMonth.replace("-", "년 ") + "월" : "");
   const statusLabels = Array.from(localStatuses)
     .map((s) => STATUS_LABEL[s])
     .join(", ");
@@ -215,7 +235,16 @@ export default function ReceptionView({
           }`}
           aria-label="필터"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <line x1="4" y1="6" x2="20" y2="6" />
             <line x1="8" y1="12" x2="16" y2="12" />
             <line x1="11" y1="18" x2="13" y2="18" />
@@ -279,9 +308,7 @@ export default function ReceptionView({
                   type="button"
                   onClick={() => toggleStatus(value)}
                   className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                    isActive
-                      ? active
-                      : "border-slate-200 text-slate-500"
+                    isActive ? active : "border-slate-200 text-slate-500"
                   }`}
                 >
                   {label}
@@ -310,10 +337,13 @@ export default function ReceptionView({
                 {/* 상태 바 */}
                 <div
                   className={`w-1 self-stretch rounded-full shrink-0 ${
-                    r.status === "READY"       ? "bg-blue-400" :
-                    r.status === "IN_PROGRESS" ? "bg-yellow-400" :
-                    r.status === "DONE"        ? "bg-green-400" :
-                                                 "bg-red-300"
+                    r.status === "READY"
+                      ? "bg-blue-400"
+                      : r.status === "IN_PROGRESS"
+                        ? "bg-yellow-400"
+                        : r.status === "DONE"
+                          ? "bg-green-400"
+                          : "bg-red-300"
                   }`}
                 />
 
@@ -323,7 +353,9 @@ export default function ReceptionView({
                     <span className="font-mono text-sm text-slate-500">
                       <Highlight text={r.id} search={search} />
                     </span>
-                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${STATUS_STYLE[r.status]}`}>
+                    <span
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${STATUS_STYLE[r.status]}`}
+                    >
                       {STATUS_LABEL[r.status]}
                     </span>
                   </div>
@@ -337,8 +369,18 @@ export default function ReceptionView({
                 </div>
 
                 {/* 화살표 */}
-                <svg className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                <svg
+                  className="w-4 h-4 text-slate-300 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </Link>
             );
