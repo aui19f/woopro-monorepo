@@ -62,7 +62,7 @@ export default async function ReceptionsPage({
   const params = await searchParams;
   const dateFilter = params.date ?? "today";
   const fromMonth = params.from;
-  const statusParam = params.status ?? "";
+  const statusParam = params.status ?? "READY";
 
   const { fromDate, toDate } = getDateRange(dateFilter, fromMonth);
 
