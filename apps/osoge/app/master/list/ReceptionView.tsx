@@ -138,6 +138,7 @@ export default function ReceptionView({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
 
   // 로컬 필터 상태 — 조회 버튼 클릭 전까지 URL에 반영하지 않음
   const [localDateFilter, setLocalDateFilter] = useState(dateFilter);
@@ -191,66 +192,105 @@ export default function ReceptionView({
     );
   }, [receptions, search]);
 
+  // 현재 선택된 필터 요약 텍스트
+  const dateLabel = DATE_FILTERS.find((f) => f.value === localDateFilter)?.label
+    ?? (localDateFilter === "custom" ? localMonth.replace("-", "년 ") + "월" : "");
+  const statusLabels = Array.from(localStatuses)
+    .map((s) => STATUS_LABEL[s])
+    .join(", ");
+  const filterSummary = [dateLabel, statusLabels].filter(Boolean).join(" · ");
+
   return (
     <div>
-      {/* 날짜 필터 */}
-      <div className="flex gap-2 flex-wrap">
-        {DATE_FILTERS.map(({ value, label }) => (
-          <button
-            key={value}
-            onClick={() => handleDateFilter(value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              dateFilter === value
-                ? "bg-point text-white"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
+      {/* 검색 바 */}
+      <div className="flex gap-2 items-center">
+        {/* 필터 토글 버튼 */}
+        <button
+          type="button"
+          onClick={() => setShowFilters((v) => !v)}
+          className={`w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 transition-colors ${
+            showFilters
+              ? "bg-point text-white border-point"
+              : "bg-white border-slate-200 text-slate-500"
+          }`}
+          aria-label="필터"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6" />
+            <line x1="8" y1="12" x2="16" y2="12" />
+            <line x1="11" y1="18" x2="13" y2="18" />
+          </svg>
+        </button>
+
+        <input
+          type="text"
+          placeholder="접수번호 또는 전화번호"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-1 h-10 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
+        />
+
+        <button
+          onClick={applyFilters}
+          className="h-10 px-5 rounded-lg bg-point text-white text-sm font-semibold shrink-0 active:opacity-80"
+        >
+          조회
+        </button>
       </div>
 
-      {/* 월 단일 선택 */}
-      {localDateFilter === "custom" && (
-        <MonthPicker value={localMonth} onChange={handleMonthChange} />
+      {/* 선택된 필터 요약 */}
+      {filterSummary && (
+        <p className="mt-1.5 ml-12 text-xs text-slate-400">{filterSummary}</p>
       )}
 
-      {/* 상태 필터 + 검색 + 조회 버튼 */}
-      <div className="flex flex-col gap-3 mt-4">
-        <div className="flex gap-2 flex-wrap">
-          {STATUSES.map(({ value, label, active }) => {
-            const isActive = localStatuses.has(value);
-            return (
+      {/* 필터 패널 */}
+      {showFilters && (
+        <div className="mt-3 p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col gap-3">
+          {/* 날짜 필터 */}
+          <div className="flex gap-2 flex-wrap">
+            {DATE_FILTERS.map(({ value, label }) => (
               <button
                 key={value}
-                onClick={() => toggleStatus(value)}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  isActive
-                    ? active
-                    : "border-slate-200 text-slate-500 hover:border-slate-300"
+                type="button"
+                onClick={() => handleDateFilter(value)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  localDateFilter === value
+                    ? "bg-point text-white"
+                    : "bg-white border border-slate-200 text-slate-600"
                 }`}
               >
                 {label}
               </button>
-            );
-          })}
+            ))}
+          </div>
+
+          {/* 월 선택 */}
+          {localDateFilter === "custom" && (
+            <MonthPicker value={localMonth} onChange={handleMonthChange} />
+          )}
+
+          {/* 상태 필터 */}
+          <div className="flex gap-2 flex-wrap">
+            {STATUSES.map(({ value, label, active }) => {
+              const isActive = localStatuses.has(value);
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => toggleStatus(value)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    isActive
+                      ? active
+                      : "border-slate-200 text-slate-500"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="접수번호 또는 전화번호"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 h-10 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
-          />
-          <button
-            onClick={applyFilters}
-            className="h-10 px-5 rounded-lg bg-point text-white text-sm font-semibold shrink-0 active:opacity-80"
-          >
-            조회
-          </button>
-        </div>
-      </div>
+      )}
 
       {/* 카드 목록 */}
       <div className="mt-4 flex flex-col gap-2">
