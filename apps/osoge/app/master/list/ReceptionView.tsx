@@ -138,48 +138,46 @@ export default function ReceptionView({
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
-  const [localMonth, setLocalMonth] = useState(fromMonth);
 
-  // URL에서 파생된 선택 상태 (UI 표시용)
-  const selectedStatuses = useMemo<Set<ReceptionStatus>>(
-    () =>
-      new Set(
-        statusParam
-          .split(",")
-          .filter(Boolean) as ReceptionStatus[]
-      ),
-    [statusParam]
+  // 로컬 필터 상태 — 조회 버튼 클릭 전까지 URL에 반영하지 않음
+  const [localDateFilter, setLocalDateFilter] = useState(dateFilter);
+  const [localMonth, setLocalMonth] = useState(fromMonth);
+  const [localStatuses, setLocalStatuses] = useState<Set<ReceptionStatus>>(
+    () => new Set(statusParam.split(",").filter(Boolean) as ReceptionStatus[])
   );
 
-  function pushParams(updates: Record<string, string | null>) {
+  function applyFilters() {
     const url = new URL(window.location.href);
-    Object.entries(updates).forEach(([k, v]) => {
-      if (v) url.searchParams.set(k, v);
-      else url.searchParams.delete(k);
-    });
+    url.searchParams.set("date", localDateFilter);
+    if (localDateFilter === "custom" && localMonth) {
+      url.searchParams.set("from", localMonth);
+    } else {
+      url.searchParams.delete("from");
+    }
+    const statusStr = Array.from(localStatuses).join(",");
+    if (statusStr) url.searchParams.set("status", statusStr);
+    else url.searchParams.delete("status");
     router.push(url.pathname + url.search);
   }
 
   function handleDateFilter(value: string) {
+    setLocalDateFilter(value);
     if (value === "custom") {
-      const month = currentYYYYMM();
-      setLocalMonth(month);
-      pushParams({ date: "custom", from: month });
-    } else {
-      pushParams({ date: value, from: null });
+      setLocalMonth(currentYYYYMM());
     }
   }
 
   function handleMonthChange(month: string) {
     setLocalMonth(month);
-    pushParams({ date: "custom", from: month || null });
   }
 
   function toggleStatus(value: ReceptionStatus) {
-    const next = new Set(selectedStatuses);
-    if (next.has(value)) next.delete(value);
-    else next.add(value);
-    pushParams({ status: Array.from(next).join(",") || null });
+    setLocalStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(value)) next.delete(value);
+      else next.add(value);
+      return next;
+    });
   }
 
   // 검색만 클라이언트 사이드 처리
@@ -213,15 +211,15 @@ export default function ReceptionView({
       </div>
 
       {/* 월 단일 선택 */}
-      {dateFilter === "custom" && (
+      {localDateFilter === "custom" && (
         <MonthPicker value={localMonth} onChange={handleMonthChange} />
       )}
 
-      {/* 상태 필터 + 검색 */}
+      {/* 상태 필터 + 검색 + 조회 버튼 */}
       <div className="flex flex-col gap-3 mt-4">
         <div className="flex gap-2 flex-wrap">
           {STATUSES.map(({ value, label, active }) => {
-            const isActive = selectedStatuses.has(value);
+            const isActive = localStatuses.has(value);
             return (
               <button
                 key={value}
@@ -237,13 +235,21 @@ export default function ReceptionView({
             );
           })}
         </div>
-        <input
-          type="text"
-          placeholder="접수번호 또는 전화번호"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="h-9 px-3 text-sm w-full border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="접수번호 또는 전화번호"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="flex-1 h-10 px-3 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
+          />
+          <button
+            onClick={applyFilters}
+            className="h-10 px-5 rounded-lg bg-point text-white text-sm font-semibold shrink-0 active:opacity-80"
+          >
+            조회
+          </button>
+        </div>
       </div>
 
       {/* 카드 목록 */}
