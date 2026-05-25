@@ -218,8 +218,8 @@ export default function ReceptionView({
       )}
 
       {/* 상태 필터 + 검색 */}
-      <div className="flex items-center justify-between mt-4 gap-4">
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-3 mt-4">
+        <div className="flex gap-2 flex-wrap">
           {STATUSES.map(({ value, label, active }) => {
             const isActive = selectedStatuses.has(value);
             return (
@@ -237,71 +237,67 @@ export default function ReceptionView({
             );
           })}
         </div>
-
         <input
           type="text"
           placeholder="접수번호 또는 전화번호"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-9 px-3 text-sm w-56 border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
+          className="h-9 px-3 text-sm w-full border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400"
         />
       </div>
 
-      {/* 목록 */}
-      <div className="mt-4 rounded-xl border border-slate-200 overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
-              <th className="text-left px-4 py-3 font-medium">접수번호</th>
-              <th className="text-left px-4 py-3 font-medium">핸드폰번호</th>
-              <th className="text-left px-4 py-3 font-medium">상태</th>
-              <th className="text-left px-4 py-3 font-medium">접수일</th>
-              <th className="px-4 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="text-center py-12 text-slate-400">
-                  접수 내역이 없습니다.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((r) => {
-                const displayPhone =
-                  search.trim() ? r.phone : maskPhone(r.phone);
-                return (
-                  <tr key={r.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-4 py-3 font-mono text-slate-700">
+      {/* 카드 목록 */}
+      <div className="mt-4 flex flex-col gap-2">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 text-slate-400 text-sm">
+            접수 내역이 없습니다.
+          </div>
+        ) : (
+          filtered.map((r) => {
+            const displayPhone = search.trim() ? r.phone : maskPhone(r.phone);
+            return (
+              <Link
+                key={r.id}
+                href={`/master/list/${r.id}`}
+                className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl px-4 py-3 hover:border-slate-300 hover:shadow-sm transition-all active:scale-[0.99]"
+              >
+                {/* 상태 바 */}
+                <div
+                  className={`w-1 self-stretch rounded-full shrink-0 ${
+                    r.status === "READY"       ? "bg-blue-400" :
+                    r.status === "IN_PROGRESS" ? "bg-yellow-400" :
+                    r.status === "DONE"        ? "bg-green-400" :
+                                                 "bg-red-300"
+                  }`}
+                />
+
+                {/* 본문 */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-sm text-slate-500">
                       <Highlight text={r.id} search={search} />
-                    </td>
-                    <td className="px-4 py-3 text-slate-700">
-                      <Highlight text={displayPhone} search={search} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_STYLE[r.status]}`}
-                      >
-                        {STATUS_LABEL[r.status]}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-slate-500">
-                      {formatDate(r.date)}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/master/list/${r.id}`}
-                        className="text-point text-xs font-medium hover:underline"
-                      >
-                        자세히보기
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                    </span>
+                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium shrink-0 ${STATUS_STYLE[r.status]}`}>
+                      {STATUS_LABEL[r.status]}
+                    </span>
+                  </div>
+                  <p className="text-base font-semibold text-slate-800 mt-0.5">
+                    <Highlight text={displayPhone} search={search} />
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    {formatDate(r.date)}&nbsp;·&nbsp;{r.time.slice(0, 5)}
+                    {r.quantity > 1 && <>&nbsp;·&nbsp;{r.quantity}개</>}
+                  </p>
+                </div>
+
+                {/* 화살표 */}
+                <svg className="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            );
+          })
+        )}
       </div>
 
       <p className="mt-3 text-xs text-slate-400 text-right">
