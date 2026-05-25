@@ -155,11 +155,7 @@ export default function ReceptionDetailView({
       </div>
 
       {/* 바디 */}
-      <div
-        className={`px-6 py-5 space-y-6 ${
-          mode === "modal" ? "flex-1 overflow-y-auto" : ""
-        }`}
-      >
+      <div className="px-6 py-5 space-y-6 flex-1 overflow-y-auto">
         {/* 기본 정보 */}
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
           <span className="text-slate-500">
@@ -280,7 +276,7 @@ export default function ReceptionDetailView({
       </div>
 
       {/* 푸터 */}
-      <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 shrink-0">
+      <div className="flex items-center justify-between px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 shrink-0 bg-white">
         <button
           onClick={onClose}
           disabled={isPending}

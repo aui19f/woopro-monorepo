@@ -11,8 +11,8 @@ export default function ReceptionDetailPage({
   const router = useRouter();
 
   return (
-    <main className="p-6 max-w-2xl mx-auto">
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+    <main className="px-4 pt-4 max-w-2xl mx-auto">
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col h-[calc(100dvh-5rem)] overflow-hidden">
         <ReceptionDetailView
           reception={reception}
           onClose={() => router.push("/master/list")}
