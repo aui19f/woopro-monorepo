@@ -14,7 +14,7 @@ export default function ReceptionDetailModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-60"
       onClick={() => router.back()}
     >
       <div
