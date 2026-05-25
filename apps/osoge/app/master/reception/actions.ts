@@ -8,7 +8,6 @@ import {
   createAdminReception,
   countTodayReceptions,
 } from "@/services/reception";
-import { phoneRegex } from "@repo/schemas/regex";
 import { EnumPaymentTiming } from "@/generated/prisma";
 
 export async function logoutAction() {
@@ -95,7 +94,8 @@ export async function adminRegisterReception(
       ? (rawTiming as EnumPaymentTiming)
       : undefined;
 
-  if (!phoneRegex.test(phone)) {
+  const adminPhoneRegex = /^\d{3}-(\d{3,4}|\*{4})-\d{4}$/;
+  if (!adminPhoneRegex.test(phone)) {
     return { status: 400, message: "올바른 전화번호를 입력해주세요." };
   }
 
