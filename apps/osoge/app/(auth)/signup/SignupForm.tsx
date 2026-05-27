@@ -1,7 +1,7 @@
 "use client";
 
 import { tempSignUp } from "@/app/(auth)/signup/actions";
-import Button from "@repo/ui/components/forms/Button/Button";
+import Button from "@repo/ui/components/forms/button/Button";
 import Input from "@repo/ui/components/forms/input/Input";
 import { useActionState } from "react";
 

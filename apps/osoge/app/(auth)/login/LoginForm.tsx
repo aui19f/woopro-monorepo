@@ -4,7 +4,8 @@ import { startTransition, useActionState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Input from "@repo/ui/components/forms/input/Input";
-import Button from "@repo/ui/components/forms/Button/Button";
+import Button from "@repo/ui/components/forms/button/Button";
+
 import loginAction from "@/app/(auth)/login/actions";
 import { LoginInput, loginSchema } from "@/lib/validations/auth";
 
