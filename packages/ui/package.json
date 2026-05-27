@@ -4,7 +4,7 @@
   "private": true,
   "exports": {
     "./*": "./src/*.tsx",
-    "./components/forms/Button/Button": "./src/components/forms/Button/Button.tsx",
+    "./components/forms/button/Button": "./src/components/forms/button/Button.tsx",
     "./components/forms/Checkbox/Checkbox": "./src/components/forms/Checkbox/Checkbox.tsx",
     "./components/forms/Textarea/Textarea": "./src/components/forms/Textarea/Textarea.tsx",
     "./components/forms/input/Input": "./src/components/forms/input/Input.tsx",
