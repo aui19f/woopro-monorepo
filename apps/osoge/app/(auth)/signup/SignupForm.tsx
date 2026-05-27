@@ -1,8 +1,8 @@
 "use client";
 
 import { tempSignUp } from "@/app/(auth)/signup/actions";
-import Button from "@/components/forms/Button/Button";
-import Input from "@/components/forms/input/Input";
+import Button from "@repo/ui/components/forms/Button/Button";
+import Input from "@repo/ui/components/forms/input/Input";
 import { useActionState } from "react";
 
 export default function SignupForm() {

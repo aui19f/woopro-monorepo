@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useId } from "react";
-import { FormOption, selectionGeometries, FormGeometry } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { FormOption, selectionGeometries, FormGeometry } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface CheckboxProps {
   sizing?: FormGeometry;

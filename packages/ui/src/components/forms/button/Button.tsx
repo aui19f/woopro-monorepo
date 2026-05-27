@@ -2,13 +2,13 @@
 
 import { ButtonHTMLAttributes, ReactNode, Ref } from "react";
 
-import { cn } from "@/utils/cn";
+import { cn } from "../../../utils/cn";
 import {
   formGeometries,
   FormGeometry,
   FormPalette,
   formPalettes,
-} from "@/types/forms";
+} from "../../../types/forms";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;

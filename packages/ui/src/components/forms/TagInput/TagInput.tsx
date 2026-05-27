@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, KeyboardEvent, useRef } from "react";
-import { formGeometries, FormGeometry } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { formGeometries, FormGeometry } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface TagInputProps {
   tags: string[];

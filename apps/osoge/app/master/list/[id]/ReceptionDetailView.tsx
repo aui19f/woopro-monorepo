@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Input from "@/components/forms/input/Input";
-import Checkbox from "@/components/forms/Checkbox/Checkbox";
+import Input from "@repo/ui/components/forms/input/Input";
+import Checkbox from "@repo/ui/components/forms/Checkbox/Checkbox";
 import { saveDetail, sendAndSaveDetail } from "@/app/master/@modal/(.)list/[id]/actions";
 
 type Status = "READY" | "IN_PROGRESS" | "DONE" | "CANCELLED";

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { formatPhone } from "@repo/schemas/formatters";
 import { phoneRegex } from "@repo/schemas/regex";
 import { receptionSchema, type ReceptionInput } from "@/schemas/reception";
-import Checkbox from "@/components/forms/Checkbox/Checkbox";
+import Checkbox from "@repo/ui/components/forms/Checkbox/Checkbox";
 import { registerReception, type ReceptionState } from "./actions";
 
 const INITIAL_DIGITS = "010";

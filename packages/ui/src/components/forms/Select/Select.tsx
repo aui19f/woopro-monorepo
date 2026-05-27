@@ -1,8 +1,8 @@
 "use client";
 
 import { Ref, SelectHTMLAttributes } from "react";
-import { formGeometries, FormGeometry, FormOption } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { formGeometries, FormGeometry, FormOption } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   options: FormOption[];

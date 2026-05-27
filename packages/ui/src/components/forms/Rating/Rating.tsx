@@ -1,7 +1,7 @@
 "use client";
 
-import { FormGeometry, selectionGeometries } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { FormGeometry, selectionGeometries } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface RatingProps {
   value: number;

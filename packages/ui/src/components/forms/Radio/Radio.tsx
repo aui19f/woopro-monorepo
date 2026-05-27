@@ -1,8 +1,8 @@
 "use client";
 
-import { FormOption, selectionGeometries, FormGeometry } from "@/types/forms";
+import { FormOption, selectionGeometries, FormGeometry } from "../../../types/forms";
 import React, { useId } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "../../../utils/cn";
 
 interface RadioProps {
   sizing?: FormGeometry;

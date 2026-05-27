@@ -1,8 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useImperativeHandle } from "react";
-import { formGeometries, FormGeometry } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { formGeometries, FormGeometry } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   name: string;

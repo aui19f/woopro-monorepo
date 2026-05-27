@@ -3,8 +3,8 @@
 import React from "react";
 
 import Image from "next/image";
-import { cn } from "@/utils/cn";
-import { formGeometries, FormGeometry } from "@/types/forms";
+import { cn } from "../../../utils/cn";
+import { formGeometries, FormGeometry } from "../../../types/forms";
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   name: string;

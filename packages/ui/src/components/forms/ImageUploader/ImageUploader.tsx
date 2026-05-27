@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { ChangeEvent, useId, useRef } from "react";
-import { cn } from "@/utils/cn";
-import { FormGeometry, imageGeometries } from "@/types/forms";
+import { cn } from "../../../utils/cn";
+import { FormGeometry, imageGeometries } from "../../../types/forms";
 
 interface ImageUploaderProps {
   previews: string[];

@@ -1,7 +1,7 @@
 "use client";
 
-import { FormGeometry, switchGeometries } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { FormGeometry, switchGeometries } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 interface SwitchProps {
   checked: boolean;

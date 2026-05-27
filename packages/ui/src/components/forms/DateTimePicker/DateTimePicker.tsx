@@ -1,7 +1,7 @@
 "use client";
 
-import { FormGeometry, formGeometries } from "@/types/forms";
-import { cn } from "@/utils/cn";
+import { FormGeometry, formGeometries } from "../../../types/forms";
+import { cn } from "../../../utils/cn";
 
 type PickerMode = "date" | "time" | "datetime";
 
