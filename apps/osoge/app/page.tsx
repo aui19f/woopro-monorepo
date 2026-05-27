@@ -1,5 +1,16 @@
 import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@repo/auth/server";
+import { getRoleFromUser, ROLE_DASHBOARDS } from "@/middleware.utils";
 
-export default function RootPage() {
-  redirect("/dashboard");
+export default async function RootPage() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const role = getRoleFromUser(user);
+  const destination = role ? ROLE_DASHBOARDS[role] : "/login";
+  redirect(destination);
 }
