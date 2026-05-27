@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*", "../../packages/ui/src/*"],
+      "@/*": ["./*"],
+      "@repo/ui/*": ["../../packages/ui/src/*"],
       "@/generated/*": ["./generated/*"]
     },
     "strictNullChecks": true
