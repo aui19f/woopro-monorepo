@@ -5,9 +5,9 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { applySchema, type ApplyInput } from "@repo/schemas/apply";
 import { formatPhone, formatBizNumber } from "@repo/schemas/formatters";
-import Button from "@repo/ui/components/forms/Button/Button";
-import Input from "@repo/ui/components/forms/input/Input";
-import Textarea from "@repo/ui/components/forms/Textarea/Textarea";
+import Button from "@/components/forms/Button/Button";
+import Input from "@/components/forms/input/Input";
+import Textarea from "@/components/forms/Textarea/Textarea";
 import { applyAction } from "./actions";
 
 export default function ApplyForm() {
