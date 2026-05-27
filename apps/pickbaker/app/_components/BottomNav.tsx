@@ -41,16 +41,21 @@ const MyPageIcon = ({ active }: { active: boolean }) => (
 );
 
 const NAV_ITEMS = [
-  { label: "피드",      href: "/feed",    Icon: FeedIcon    },
-  { label: "레시피",    href: "/recipe",  Icon: RecipeIcon  },
-  { label: "오프라인",  href: "/offline", Icon: OfflineIcon },
-  { label: "마이페이지", href: "/mypage", Icon: MyPageIcon  },
+  { label: "피드",    href: "/feed",    Icon: FeedIcon    },
+  { label: "레시피",  href: "/recipe",  Icon: RecipeIcon  },
+  { label: "오프라인", href: "/offline", Icon: OfflineIcon },
 ] as const;
 
-export default function BottomNav() {
-  const pathname = usePathname();
+interface BottomNavProps {
+  userId?: string;
+}
 
+export default function BottomNav({ userId }: BottomNavProps) {
+  const pathname = usePathname();
   const isActive = (href: string) => pathname.startsWith(href);
+
+  const mypageHref = userId ? `/${userId}` : "/login";
+  const mypageActive = userId ? pathname.startsWith(`/${userId}`) : false;
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-stone-200 flex items-center z-50">
@@ -76,15 +81,13 @@ export default function BottomNav() {
         href="/write"
         className="flex flex-col items-center justify-center flex-1 h-full"
       >
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center shadow-md transition-all ${
-          isActive("/write") ? "bg-point" : "bg-point"
-        }`}>
+        <div className="w-11 h-11 rounded-2xl bg-point flex items-center justify-center shadow-md text-white">
           <WriteIcon />
         </div>
         <span className="text-[10px] font-medium text-point mt-0.5">글쓰기</span>
       </Link>
 
-      {/* 오프라인 · 마이페이지 */}
+      {/* 오프라인 */}
       {NAV_ITEMS.slice(2).map(({ label, href, Icon }) => {
         const active = isActive(href);
         return (
@@ -100,6 +103,17 @@ export default function BottomNav() {
           </Link>
         );
       })}
+
+      {/* 마이페이지 */}
+      <Link
+        href={mypageHref}
+        className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+          mypageActive ? "text-point" : "text-stone-400"
+        }`}
+      >
+        <MyPageIcon active={mypageActive} />
+        <span className="text-[10px] font-medium">마이페이지</span>
+      </Link>
     </nav>
   );
 }

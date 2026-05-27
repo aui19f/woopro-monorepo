@@ -1,12 +1,27 @@
-export default function MyPage() {
+import { redirect } from "next/navigation";
+import { createSupabaseServerClient } from "@repo/auth/server";
+import { prisma } from "@/lib/prisma";
+
+export default async function MyPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  const supabase = await createSupabaseServerClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const profile = await prisma.user.findUnique({ where: { username: id } });
+  if (!profile) redirect("/feed");
+
   return (
     <div className="px-4 pt-6">
       {/* 프로필 */}
       <div className="flex items-center gap-4 bg-white rounded-2xl border border-stone-100 px-5 py-5 shadow-sm">
-        <div className="w-16 h-16 rounded-full bg-stone-100 shrink-0" />
+        <div className="w-16 h-16 rounded-full bg-stone-100 shrink-0 flex items-center justify-center text-2xl font-bold text-stone-300">
+          {profile.nickname.charAt(0).toUpperCase()}
+        </div>
         <div>
-          <p className="text-base font-bold text-stone-800">닉네임</p>
-          <p className="text-xs text-stone-400 mt-0.5">pickbaker@example.com</p>
+          <p className="text-base font-bold text-stone-800">{profile.nickname}</p>
+          <p className="text-xs text-stone-400 mt-0.5">@{profile.username}</p>
         </div>
       </div>
 

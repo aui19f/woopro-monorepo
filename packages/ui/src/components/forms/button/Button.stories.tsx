@@ -1,4 +1,4 @@
-import Button from "@/components/forms/Button/Button";
+import Button from "@/components/forms/button/Button";
 import { Meta, StoryObj } from "@storybook/react-vite";
 
 const meta: Meta<typeof Button> = {
