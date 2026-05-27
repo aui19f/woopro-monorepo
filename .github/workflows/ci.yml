@@ -1,0 +1,47 @@
+name: CI
+
+# 언제 이 작업을 실행할 것인가?
+on:
+  push:
+    branches: ["main", "feature/*"] # main 브랜치에 푸시될 때
+  pull_request: # 모든 PR이 생성되거나 업데이트될 때
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest # 실행 환경 (가상 서버)
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Turborepo의 캐시 기능을 사용하여 속도를 높입니다.
+      - name: Turbo Cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Lint
+        run: pnpm turbo lint
+
+      # - name: Test
+      #   run: pnpm turbo test
+
+      - name: Build
+        run: pnpm turbo build

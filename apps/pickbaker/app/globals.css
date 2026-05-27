@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src";
+
+@theme {
+  --color-point: #c8853a;
+  --color-base: #fdf8f3;
+  --color-sub: #78716c;
+  --color-error: #ef4444;
+}
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-base);
+}

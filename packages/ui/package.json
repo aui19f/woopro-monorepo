@@ -3,24 +3,61 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    "./*": "./src/*.tsx",
+    "./components/forms/button/Button": "./src/components/forms/button/Button.tsx",
+    "./components/forms/Checkbox/Checkbox": "./src/components/forms/Checkbox/Checkbox.tsx",
+    "./components/forms/Textarea/Textarea": "./src/components/forms/Textarea/Textarea.tsx",
+    "./components/forms/input/Input": "./src/components/forms/input/Input.tsx",
+    "./components/forms/DateTimePicker/DateTimePicker": "./src/components/forms/DateTimePicker/DateTimePicker.tsx",
+    "./components/forms/ImageUploader/ImageUploader": "./src/components/forms/ImageUploader/ImageUploader.tsx",
+    "./components/forms/Radio/Radio": "./src/components/forms/Radio/Radio.tsx",
+    "./components/forms/Rating/Rating": "./src/components/forms/Rating/Rating.tsx",
+    "./components/forms/Select/Select": "./src/components/forms/Select/Select.tsx",
+    "./components/forms/Switch/Switch": "./src/components/forms/Switch/Switch.tsx",
+    "./components/forms/TagInput/TagInput": "./src/components/forms/TagInput/TagInput.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "test": "echo 'No tests yet'",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "devDependencies": {
+    "@chromatic-com/storybook": "^5.1.1",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@storybook/addon-a11y": "^10.3.5",
+    "@storybook/addon-docs": "^10.3.5",
+    "@storybook/addon-vitest": "^10.3.5",
+    "@storybook/react-vite": "^10.3.5",
+    "@tailwindcss/vite": "^4.2.2",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "@vitest/browser-playwright": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^9.39.1",
-    "typescript": "5.9.2"
+    "eslint-plugin-storybook": "^10.3.5",
+    "jsdom": "^29.0.2",
+    "playwright": "^1.59.1",
+    "storybook": "^10.3.5",
+    "tailwindcss": "^4.0.0",
+    "typescript": "5.9.2",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.4"
   },
-  "dependencies": {
+  "peerDependencies": {
+    "next": ">=15.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^3.5.0"
   }
 }

@@ -1,0 +1,14 @@
+# deps
+node_modules/
+
+# next
+.next/
+out/
+
+# prisma - generated client (includes OS-specific binaries)
+generated/
+
+# env
+.env
+.env.local
+.env.*.local

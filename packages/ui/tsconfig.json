@@ -1,6 +1,10 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "baseUrl": ".", // 기준 경로 설정
+    "paths": {
+      "@/*": ["src/*"] // "src" 폴더 아래의 모든 파일을 "@/"로 시작하는 경로로 매핑
+    },
     "outDir": "dist",
     "strictNullChecks": true
   },
