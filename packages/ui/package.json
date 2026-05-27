@@ -3,7 +3,18 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    "./*": "./src/*.tsx",
+    "./components/forms/Button/Button": "./src/components/forms/Button/Button.tsx",
+    "./components/forms/Checkbox/Checkbox": "./src/components/forms/Checkbox/Checkbox.tsx",
+    "./components/forms/Textarea/Textarea": "./src/components/forms/Textarea/Textarea.tsx",
+    "./components/forms/input/Input": "./src/components/forms/input/Input.tsx",
+    "./components/forms/DateTimePicker/DateTimePicker": "./src/components/forms/DateTimePicker/DateTimePicker.tsx",
+    "./components/forms/ImageUploader/ImageUploader": "./src/components/forms/ImageUploader/ImageUploader.tsx",
+    "./components/forms/Radio/Radio": "./src/components/forms/Radio/Radio.tsx",
+    "./components/forms/Rating/Rating": "./src/components/forms/Rating/Rating.tsx",
+    "./components/forms/Select/Select": "./src/components/forms/Select/Select.tsx",
+    "./components/forms/Switch/Switch": "./src/components/forms/Switch/Switch.tsx",
+    "./components/forms/TagInput/TagInput": "./src/components/forms/TagInput/TagInput.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",
