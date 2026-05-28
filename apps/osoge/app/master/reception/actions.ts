@@ -88,7 +88,6 @@ export async function adminRegisterReception(
   _prev: ReceptionState,
   formData: FormData
 ): Promise<ReceptionState> {
-  const inputMode = formData.get("inputMode") as string;
   const phone = (formData.get("phone") as string) || undefined;
   const name = (formData.get("name") as string) || undefined;
   const rawAmount = formData.get("amount") as string;
@@ -102,14 +101,14 @@ export async function adminRegisterReception(
 
   const adminPhoneRegex = /^\d{3}-(\d{3,4}|\*{4})-\d{4}$/;
 
-  if (inputMode === "phone") {
-    if (!phone || !adminPhoneRegex.test(phone)) {
-      return { status: 400, message: "올바른 전화번호를 입력해주세요." };
-    }
-  } else {
-    if (!name?.trim()) {
-      return { status: 400, message: "이름을 입력해주세요." };
-    }
+  const phoneProvided = !!phone && adminPhoneRegex.test(phone);
+  const nameProvided = !!name?.trim();
+
+  if (!phoneProvided && !nameProvided) {
+    return { status: 400, message: "전화번호 또는 이름을 입력해주세요." };
+  }
+  if (phone && !adminPhoneRegex.test(phone)) {
+    return { status: 400, message: "올바른 전화번호 형식을 확인해주세요." };
   }
 
   const rawDate = formData.get("date") as string;
@@ -122,8 +121,8 @@ export async function adminRegisterReception(
   try {
     await createAdminReception({
       id,
-      phone: inputMode === "phone" ? phone : undefined,
-      name: inputMode === "name" ? name : undefined,
+      phone: phoneProvided ? phone : undefined,
+      name: name?.trim() || undefined,
       date,
       time,
       quantity: 1,

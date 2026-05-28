@@ -19,7 +19,6 @@ const KEYPAD_ROWS = [
 ] as const;
 
 type Key = (typeof KEYPAD_ROWS)[number][number];
-type InputMode = "phone" | "name";
 
 interface Props {
   todayCount: number;
@@ -48,10 +47,8 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
-  const nameInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast(2000);
 
-  const [inputMode, setInputMode] = useState<InputMode>("phone");
   const [digits, setDigits] = useState(INITIAL_DIGITS);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
@@ -67,9 +64,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   );
 
   const formatted = formatPhone(digits);
-  const isPhoneValid = phoneRegex.test(formatted);
-  const storedPhone = hideMiddle && isPhoneValid ? maskPhone(formatted) : formatted;
-  const isValid = inputMode === "phone" ? isPhoneValid : name.trim().length > 0;
+  const isPhoneEntered = phoneRegex.test(formatted);
+  const storedPhone = hideMiddle && isPhoneEntered ? maskPhone(formatted) : formatted;
+  const isValid = isPhoneEntered || name.trim().length > 0;
   const dateYYYYMMDD = isoToYYYYMMDD(selectedDate);
   const displayDate = isoToDisplay(selectedDate);
 
@@ -94,23 +91,14 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     setSelectedDate(e.target.value);
   };
 
-  const handleModeSwitch = (mode: InputMode) => {
-    setInputMode(mode);
-    if (mode === "name") {
-      setTimeout(() => nameInputRef.current?.focus(), 50);
-    }
-  };
-
   const handleSubmit = () => {
     formRef.current?.requestSubmit();
   };
 
-  // 날짜 변경 시 해당 날짜 접수 수량 갱신
   useEffect(() => {
     getCountByDate(dateYYYYMMDD).then(setCount);
   }, [dateYYYYMMDD]);
 
-  // 등록 성공 시 초기화
   useEffect(() => {
     if (state?.status === 200) {
       setCount((c) => c + 1);
@@ -128,9 +116,8 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     <>
       {/* 서버 액션 hidden form */}
       <form ref={formRef} action={formAction} className="sr-only" aria-hidden>
-        <input name="inputMode" value={inputMode} readOnly />
-        <input name="phone" value={inputMode === "phone" ? storedPhone : ""} readOnly />
-        <input name="name" value={inputMode === "name" ? name : ""} readOnly />
+        <input name="phone" value={isPhoneEntered ? storedPhone : ""} readOnly />
+        <input name="name" value={name} readOnly />
         <input name="date" value={dateYYYYMMDD} readOnly />
         <input name="amount" value={amount} readOnly />
         <input name="paymentTiming" value={isPostpaid ? "POSTPAID" : "PREPAID"} readOnly />
@@ -139,7 +126,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
 
       <div className="h-screen flex flex-col bg-slate-50 select-none">
 
-        {/* 헤더: 날짜(수정 가능) + 접수 수량 */}
+        {/* 헤더 */}
         <div className="shrink-0 flex items-center justify-between px-5 pt-5 pb-4 bg-white border-b border-slate-100">
           <div>
             <p className="text-xs text-slate-400 font-medium">관리자 접수 모드</p>
@@ -173,101 +160,73 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
           </div>
         </div>
 
-        {/* 스크롤 가능한 콘텐츠 영역 */}
+        {/* 스크롤 가능한 콘텐츠 */}
         <div className="flex-1 overflow-y-auto pb-4">
 
-          {/* 입력 모드 탭 */}
-          <div className="mx-4 mt-4 flex rounded-xl bg-slate-100 p-1 gap-1">
-            <button
-              type="button"
-              onClick={() => handleModeSwitch("phone")}
-              className={`flex-1 h-9 rounded-lg text-sm font-semibold transition-colors ${
-                inputMode === "phone"
-                  ? "bg-white text-slate-800 shadow-sm"
-                  : "text-slate-400"
-              }`}
-            >
-              전화번호
-            </button>
-            <button
-              type="button"
-              onClick={() => handleModeSwitch("name")}
-              className={`flex-1 h-9 rounded-lg text-sm font-semibold transition-colors ${
-                inputMode === "name"
-                  ? "bg-white text-slate-800 shadow-sm"
-                  : "text-slate-400"
-              }`}
-            >
-              이름
-            </button>
+          {/* 이름 입력 */}
+          <div className="mx-4 mt-4 bg-white rounded-2xl px-5 py-3 border border-slate-100">
+            <label className="text-xs text-slate-400 block mb-1.5">
+              이름 <span className="text-slate-300">(전화번호 없을 시 필수)</span>
+            </label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="고객 이름"
+              className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-800 text-lg font-semibold focus:outline-none focus:border-blue-400 select-text"
+            />
           </div>
 
-          {/* 전화번호 모드 */}
-          {inputMode === "phone" && (
-            <>
-              <div className="px-5 py-3 bg-white mx-4 mt-3 rounded-2xl border border-slate-100">
-                <div className="flex items-center justify-between mb-1">
-                  <p className="text-xs text-slate-400">입력된 번호</p>
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={hideMiddle}
-                      onChange={(e) => setHideMiddle(e.target.checked)}
-                      className="w-4 h-4 accent-point"
-                    />
-                    <span className="text-xs text-slate-500">뒷자리만 저장</span>
-                  </label>
-                </div>
-                <p className={`text-4xl font-bold tracking-widest ${isPhoneValid ? "text-slate-800" : "text-slate-300"}`}>
-                  {isPhoneValid ? storedPhone : (formatted || "010-0000-0000")}
-                </p>
-              </div>
-
-              <div className="flex justify-center mt-3">
-                <div className="flex flex-col gap-2">
-                  {KEYPAD_ROWS.map((row, i) => (
-                    <div key={i} className="flex gap-2">
-                      {row.map((key) => {
-                        const isSpecial = key === "clear" || key === "delete";
-                        return (
-                          <button
-                            key={key}
-                            type="button"
-                            onClick={() => handleKey(key)}
-                            className={`
-                              w-18 h-18 rounded-xl font-semibold
-                              shadow-sm active:scale-95 transition-transform duration-75
-                              ${isSpecial
-                                ? "bg-slate-200 text-slate-500 text-sm"
-                                : "bg-white border border-slate-200 text-slate-800 text-2xl"
-                              }
-                            `}
-                          >
-                            {key === "clear" ? "초기화" : key === "delete" ? "지우기" : key}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* 이름 모드 */}
-          {inputMode === "name" && (
-            <div className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-slate-100">
-              <label className="text-xs text-slate-400 block mb-2">이름</label>
-              <input
-                ref={nameInputRef}
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="고객 이름 입력"
-                className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-800 text-xl font-semibold focus:outline-none focus:border-blue-400 select-text"
-              />
+          {/* 전화번호 표시 */}
+          <div className="px-5 py-3 bg-white mx-4 mt-3 rounded-2xl border border-slate-100">
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs text-slate-400">
+                전화번호 <span className="text-slate-300">(이름 없을 시 필수)</span>
+              </p>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={hideMiddle}
+                  onChange={(e) => setHideMiddle(e.target.checked)}
+                  className="w-4 h-4 accent-point"
+                />
+                <span className="text-xs text-slate-500">뒷자리만 저장</span>
+              </label>
             </div>
-          )}
+            <p className={`text-4xl font-bold tracking-widest ${isPhoneEntered ? "text-slate-800" : "text-slate-300"}`}>
+              {isPhoneEntered ? storedPhone : (formatted || "010-0000-0000")}
+            </p>
+          </div>
+
+          {/* 키패드 */}
+          <div className="flex justify-center mt-3">
+            <div className="flex flex-col gap-2">
+              {KEYPAD_ROWS.map((row, i) => (
+                <div key={i} className="flex gap-2">
+                  {row.map((key) => {
+                    const isSpecial = key === "clear" || key === "delete";
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => handleKey(key)}
+                        className={`
+                          w-18 h-18 rounded-xl font-semibold
+                          shadow-sm active:scale-95 transition-transform duration-75
+                          ${isSpecial
+                            ? "bg-slate-200 text-slate-500 text-sm"
+                            : "bg-white border border-slate-200 text-slate-800 text-2xl"
+                          }
+                        `}
+                      >
+                        {key === "clear" ? "초기화" : key === "delete" ? "지우기" : key}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
 
           {/* 금액 + 후불 */}
           <div className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-slate-100">
