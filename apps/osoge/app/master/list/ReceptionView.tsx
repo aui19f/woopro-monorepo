@@ -16,6 +16,7 @@ type ReceptionItem = {
   agreed: boolean;
   message_sent_count: number;
   quantity: number;
+  payment_amount: number | null;
   storeId: string | null;
 };
 
@@ -219,6 +220,7 @@ export default function ReceptionView({
     .map((s) => STATUS_LABEL[s])
     .join(", ");
   const filterSummary = [dateLabel, statusLabels].filter(Boolean).join(" · ");
+  const totalAmount = filtered.reduce((sum, r) => sum + (r.payment_amount ?? 0), 0);
 
   return (
     <div>
@@ -267,10 +269,11 @@ export default function ReceptionView({
         </button>
       </div>
 
-      {/* 선택된 필터 요약 */}
-      {filterSummary && (
-        <p className="mt-1.5 ml-12 text-xs text-slate-400">{filterSummary}</p>
-      )}
+      {/* 선택된 필터 요약 + 통계 */}
+      <p className="mt-1.5 ml-12 text-xs text-slate-400">
+        {filterSummary && `${filterSummary} | `}
+        접수{filtered.length} / 총금액{totalAmount.toLocaleString()}원
+      </p>
 
       {/* 필터 패널 */}
       {showFilters && (

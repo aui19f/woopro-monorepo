@@ -18,7 +18,7 @@ function getTodayKST() {
 }
 
 export default async function AdminPage() {
-  const { date, display, iso } = getTodayKST();
+  const { date, iso } = getTodayKST();
   const todayCount = await countTodayReceptions(date);
-  return <AdminReception todayCount={todayCount} today={display} todayISO={iso} />;
+  return <AdminReception todayCount={todayCount} todayISO={iso} />;
 }

@@ -14,7 +14,10 @@
     "./components/forms/Rating/Rating": "./src/components/forms/Rating/Rating.tsx",
     "./components/forms/Select/Select": "./src/components/forms/Select/Select.tsx",
     "./components/forms/Switch/Switch": "./src/components/forms/Switch/Switch.tsx",
-    "./components/forms/TagInput/TagInput": "./src/components/forms/TagInput/TagInput.tsx"
+    "./components/forms/TagInput/TagInput": "./src/components/forms/TagInput/TagInput.tsx",
+    "./components/Spinner/Spinner": "./src/components/Spinner/Spinner.tsx",
+    "./components/Toast/Toast": "./src/components/Toast/Toast.tsx",
+    "./hooks/useToast": "./src/hooks/useToast.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings 0",

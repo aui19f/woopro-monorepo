@@ -7,14 +7,17 @@ import { formatPhone } from "@repo/schemas/formatters";
 import { phoneRegex } from "@repo/schemas/regex";
 import { receptionSchema, type ReceptionInput } from "@/schemas/reception";
 import Checkbox from "@repo/ui/components/forms/Checkbox/Checkbox";
+import Spinner from "@repo/ui/components/Spinner/Spinner";
+import Toast from "@repo/ui/components/Toast/Toast";
+import { useToast } from "@repo/ui/hooks/useToast";
 import { registerReception, type ReceptionState } from "./actions";
 
 const INITIAL_DIGITS = "010";
 
 const KEYPAD_ROWS = [
-  ["7", "8", "9"],
-  ["4", "5", "6"],
   ["1", "2", "3"],
+  ["4", "5", "6"],
+  ["7", "8", "9"],
   ["clear", "0", "delete"],
 ] as const;
 
@@ -29,6 +32,7 @@ export default function ReceptionKiosk({ notice }: { notice?: string }) {
   const [today, setToday] = useState("");
   const [showModal, setShowModal] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  const toast = useToast(2000);
 
   const [state, formAction, isPending] = useActionState<ReceptionState, FormData>(
     registerReception,
@@ -62,8 +66,9 @@ export default function ReceptionKiosk({ notice }: { notice?: string }) {
       setShowModal(false);
       setDigits(INITIAL_DIGITS);
       reset({ phone: "", agreed: false });
+      toast.show("완료되었습니다");
     }
-  }, [state, reset]);
+  }, [state, reset, toast.show]);
 
   const updateDigits = (next: string) => {
     setDigits(next);
@@ -131,7 +136,7 @@ export default function ReceptionKiosk({ notice }: { notice?: string }) {
                       }
                     `}
                   >
-                    {key === "clear" ? "초기화" : key === "delete" ? "⌫" : key}
+                    {key === "clear" ? "초기화" : key === "delete" ? "지우기" : key}
                   </button>
                 );
               })}
@@ -212,14 +217,23 @@ export default function ReceptionKiosk({ notice }: { notice?: string }) {
               <button
                 onClick={handleConfirm}
                 disabled={isPending}
-                className="flex-1 h-14 rounded-2xl bg-point text-white font-semibold text-lg disabled:opacity-50"
+                className="flex-1 h-14 rounded-2xl bg-point text-white font-semibold text-lg disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {isPending ? "저장 중..." : "확인"}
+                {isPending ? (
+                  <>
+                    <Spinner size={18} />
+                    저장 중...
+                  </>
+                ) : (
+                  "확인"
+                )}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <Toast message={toast.message} visible={toast.visible} />
     </>
   );
 }
