@@ -89,12 +89,14 @@ export async function incrementMessageSentCount(id: string) {
 
 export async function createAdminReception(data: {
   id: string;
-  phone: string;
+  phone?: string;
+  name?: string;
   date: string;
   time: string;
   quantity: number;
   payment_amount?: number;
   payment_timing?: EnumPaymentTiming;
+  memo?: string;
   storeId?: string;
 }) {
   return prisma.reception.create({ data: { ...data, agreed: true } });

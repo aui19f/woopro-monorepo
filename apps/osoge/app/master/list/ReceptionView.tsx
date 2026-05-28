@@ -9,7 +9,8 @@ type ReceptionStatus = "READY" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 
 type ReceptionItem = {
   id: string;
-  phone: string;
+  phone: string | null;
+  name: string | null;
   date: string;
   time: string;
   status: ReceptionStatus;
@@ -208,7 +209,8 @@ export default function ReceptionView({
     return receptions.filter(
       (r) =>
         r.id.toLowerCase().includes(q) ||
-        r.phone.replace(/-/g, "").includes(q.replace(/-/g, ""))
+        (r.phone ?? "").replace(/-/g, "").includes(q.replace(/-/g, "")) ||
+        (r.name ?? "").toLowerCase().includes(q)
     );
   }, [receptions, search]);
 
@@ -330,7 +332,9 @@ export default function ReceptionView({
           </div>
         ) : (
           filtered.map((r) => {
-            const displayPhone = search.trim() ? r.phone : maskPhone(r.phone);
+            const displayContact = r.phone
+              ? (search.trim() ? r.phone : maskPhone(r.phone))
+              : (r.name ?? "-");
             return (
               <Link
                 key={r.id}
@@ -362,8 +366,8 @@ export default function ReceptionView({
                       {STATUS_LABEL[r.status]}
                     </span>
                   </div>
-                  <p className="text-base font-semibold text-slate-800 mt-0.5">
-                    <Highlight text={displayPhone} search={search} />
+                  <p className="font-semibold text-slate-800 mt-0.5">
+                    <Highlight text={displayContact} search={search} />
                   </p>
                   <p className="text-xs text-slate-400 mt-0.5">
                     {formatDate(r.date)}&nbsp;·&nbsp;{r.time.slice(0, 5)}

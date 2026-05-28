@@ -88,8 +88,9 @@ export async function adminRegisterReception(
   _prev: ReceptionState,
   formData: FormData
 ): Promise<ReceptionState> {
-  const phone = formData.get("phone") as string;
-  const quantity = Math.max(1, parseInt(formData.get("quantity") as string) || 1);
+  const inputMode = formData.get("inputMode") as string;
+  const phone = (formData.get("phone") as string) || undefined;
+  const name = (formData.get("name") as string) || undefined;
   const rawAmount = formData.get("amount") as string;
   const payment_amount = rawAmount ? parseInt(rawAmount.replace(/,/g, "")) : undefined;
   const rawTiming = formData.get("paymentTiming") as string | null;
@@ -97,10 +98,18 @@ export async function adminRegisterReception(
     rawTiming === "PREPAID" || rawTiming === "POSTPAID"
       ? (rawTiming as EnumPaymentTiming)
       : undefined;
+  const memo = (formData.get("memo") as string) || undefined;
 
   const adminPhoneRegex = /^\d{3}-(\d{3,4}|\*{4})-\d{4}$/;
-  if (!adminPhoneRegex.test(phone)) {
-    return { status: 400, message: "올바른 전화번호를 입력해주세요." };
+
+  if (inputMode === "phone") {
+    if (!phone || !adminPhoneRegex.test(phone)) {
+      return { status: 400, message: "올바른 전화번호를 입력해주세요." };
+    }
+  } else {
+    if (!name?.trim()) {
+      return { status: 400, message: "이름을 입력해주세요." };
+    }
   }
 
   const rawDate = formData.get("date") as string;
@@ -111,7 +120,17 @@ export async function adminRegisterReception(
   const id = `${date}${String(count + 1).padStart(3, "0")}`;
 
   try {
-    await createAdminReception({ id, phone, date, time, quantity, payment_amount, payment_timing });
+    await createAdminReception({
+      id,
+      phone: inputMode === "phone" ? phone : undefined,
+      name: inputMode === "name" ? name : undefined,
+      date,
+      time,
+      quantity: 1,
+      payment_amount,
+      payment_timing,
+      memo,
+    });
     return { status: 200, message: "성공" };
   } catch (error) {
     console.error("adminRegisterReception error:", error);

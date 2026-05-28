@@ -19,6 +19,7 @@ const KEYPAD_ROWS = [
 ] as const;
 
 type Key = (typeof KEYPAD_ROWS)[number][number];
+type InputMode = "phone" | "name";
 
 interface Props {
   todayCount: number;
@@ -47,10 +48,14 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast(2000);
 
+  const [inputMode, setInputMode] = useState<InputMode>("phone");
   const [digits, setDigits] = useState(INITIAL_DIGITS);
+  const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
+  const [memo, setMemo] = useState("");
   const [isPostpaid, setIsPostpaid] = useState(false);
   const [hideMiddle, setHideMiddle] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayISO);
@@ -62,8 +67,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   );
 
   const formatted = formatPhone(digits);
-  const isValid = phoneRegex.test(formatted);
-  const storedPhone = hideMiddle && isValid ? maskPhone(formatted) : formatted;
+  const isPhoneValid = phoneRegex.test(formatted);
+  const storedPhone = hideMiddle && isPhoneValid ? maskPhone(formatted) : formatted;
+  const isValid = inputMode === "phone" ? isPhoneValid : name.trim().length > 0;
   const dateYYYYMMDD = isoToYYYYMMDD(selectedDate);
   const displayDate = isoToDisplay(selectedDate);
 
@@ -88,6 +94,13 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     setSelectedDate(e.target.value);
   };
 
+  const handleModeSwitch = (mode: InputMode) => {
+    setInputMode(mode);
+    if (mode === "name") {
+      setTimeout(() => nameInputRef.current?.focus(), 50);
+    }
+  };
+
   const handleSubmit = () => {
     formRef.current?.requestSubmit();
   };
@@ -102,7 +115,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     if (state?.status === 200) {
       setCount((c) => c + 1);
       setDigits(INITIAL_DIGITS);
+      setName("");
       setAmount("");
+      setMemo("");
       setIsPostpaid(false);
       toast.show("완료되었습니다");
       router.refresh();
@@ -113,23 +128,26 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     <>
       {/* 서버 액션 hidden form */}
       <form ref={formRef} action={formAction} className="sr-only" aria-hidden>
-        <input name="phone" value={storedPhone} readOnly />
+        <input name="inputMode" value={inputMode} readOnly />
+        <input name="phone" value={inputMode === "phone" ? storedPhone : ""} readOnly />
+        <input name="name" value={inputMode === "name" ? name : ""} readOnly />
         <input name="date" value={dateYYYYMMDD} readOnly />
         <input name="amount" value={amount} readOnly />
         <input name="paymentTiming" value={isPostpaid ? "POSTPAID" : "PREPAID"} readOnly />
+        <textarea name="memo" value={memo} readOnly />
       </form>
 
-      <div className="h-screen overflow-hidden flex flex-col bg-slate-50 select-none">
+      <div className="h-screen flex flex-col bg-slate-50 select-none">
 
         {/* 헤더: 날짜(수정 가능) + 접수 수량 */}
-        <div className="flex items-center justify-between px-5 pt-6 pb-4 bg-white border-b border-slate-100">
+        <div className="shrink-0 flex items-center justify-between px-5 pt-5 pb-4 bg-white border-b border-slate-100">
           <div>
             <p className="text-xs text-slate-400 font-medium">관리자 접수 모드</p>
             <div
               className="relative mt-0.5 cursor-pointer"
               onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
             >
-              <p className="text-base font-semibold text-slate-700 flex items-center gap-1.5 pr-1">
+              <p className="font-semibold text-slate-700 flex items-center gap-1.5 pr-1">
                 {displayDate}
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -155,110 +173,170 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
           </div>
         </div>
 
-        {/* 전화번호 표시 */}
-        <div className="px-5 py-4 bg-white mt-2">
-          <div className="flex items-center justify-between mb-1">
-            <p className="text-xs text-slate-400">입력된 번호</p>
-            <label className="flex items-center gap-1.5 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={hideMiddle}
-                onChange={(e) => setHideMiddle(e.target.checked)}
-                className="w-4 h-4 accent-point"
-              />
-              <span className="text-xs text-slate-500">뒷자리만 저장</span>
-            </label>
-          </div>
-          <p className={`text-4xl font-bold tracking-widest ${isValid ? "text-slate-800" : "text-slate-300"}`}>
-            {isValid ? storedPhone : (formatted || "010-0000-0000")}
-          </p>
-        </div>
+        {/* 스크롤 가능한 콘텐츠 영역 */}
+        <div className="flex-1 overflow-y-auto pb-4">
 
-        {/* 키패드 */}
-        <div className="flex justify-center mt-3">
-          <div className="flex flex-col gap-2">
-            {KEYPAD_ROWS.map((row, i) => (
-              <div key={i} className="flex gap-2">
-                {row.map((key) => {
-                  const isSpecial = key === "clear" || key === "delete";
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => handleKey(key)}
-                      className={`
-                        w-18 h-18 rounded-xl font-semibold
-                        shadow-sm active:scale-95 transition-transform duration-75
-                        ${isSpecial
-                          ? "bg-slate-200 text-slate-500 text-sm"
-                          : "bg-white border border-slate-200 text-slate-800 text-2xl"
-                        }
-                      `}
-                    >
-                      {key === "clear" ? "초기화" : key === "delete" ? "지우기" : key}
-                    </button>
-                  );
-                })}
+          {/* 입력 모드 탭 */}
+          <div className="mx-4 mt-4 flex rounded-xl bg-slate-100 p-1 gap-1">
+            <button
+              type="button"
+              onClick={() => handleModeSwitch("phone")}
+              className={`flex-1 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                inputMode === "phone"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-400"
+              }`}
+            >
+              전화번호
+            </button>
+            <button
+              type="button"
+              onClick={() => handleModeSwitch("name")}
+              className={`flex-1 h-9 rounded-lg text-sm font-semibold transition-colors ${
+                inputMode === "name"
+                  ? "bg-white text-slate-800 shadow-sm"
+                  : "text-slate-400"
+              }`}
+            >
+              이름
+            </button>
+          </div>
+
+          {/* 전화번호 모드 */}
+          {inputMode === "phone" && (
+            <>
+              <div className="px-5 py-3 bg-white mx-4 mt-3 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between mb-1">
+                  <p className="text-xs text-slate-400">입력된 번호</p>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={hideMiddle}
+                      onChange={(e) => setHideMiddle(e.target.checked)}
+                      className="w-4 h-4 accent-point"
+                    />
+                    <span className="text-xs text-slate-500">뒷자리만 저장</span>
+                  </label>
+                </div>
+                <p className={`text-4xl font-bold tracking-widest ${isPhoneValid ? "text-slate-800" : "text-slate-300"}`}>
+                  {isPhoneValid ? storedPhone : (formatted || "010-0000-0000")}
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* 입력 폼: 금액 + 후불 체크박스 */}
-        <div className="mx-4 mt-4 bg-white rounded-2xl px-5 py-4 border border-slate-100">
-          <div className="flex items-center gap-3">
-            <label className="w-14 text-sm font-medium text-slate-500 shrink-0">금액</label>
-            <div className="flex-1 relative">
+              <div className="flex justify-center mt-3">
+                <div className="flex flex-col gap-2">
+                  {KEYPAD_ROWS.map((row, i) => (
+                    <div key={i} className="flex gap-2">
+                      {row.map((key) => {
+                        const isSpecial = key === "clear" || key === "delete";
+                        return (
+                          <button
+                            key={key}
+                            type="button"
+                            onClick={() => handleKey(key)}
+                            className={`
+                              w-18 h-18 rounded-xl font-semibold
+                              shadow-sm active:scale-95 transition-transform duration-75
+                              ${isSpecial
+                                ? "bg-slate-200 text-slate-500 text-sm"
+                                : "bg-white border border-slate-200 text-slate-800 text-2xl"
+                              }
+                            `}
+                          >
+                            {key === "clear" ? "초기화" : key === "delete" ? "지우기" : key}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* 이름 모드 */}
+          {inputMode === "name" && (
+            <div className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-slate-100">
+              <label className="text-xs text-slate-400 block mb-2">이름</label>
               <input
+                ref={nameInputRef}
                 type="text"
-                inputMode="numeric"
-                value={amount}
-                onChange={handleAmountChange}
-                placeholder="0"
-                className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 pr-8 text-slate-800 font-semibold focus:outline-none focus:border-blue-400"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="고객 이름 입력"
+                className="w-full h-12 rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-800 text-xl font-semibold focus:outline-none focus:border-blue-400 select-text"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">원</span>
             </div>
-            <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
-              <input
-                type="checkbox"
-                checked={isPostpaid}
-                onChange={(e) => setIsPostpaid(e.target.checked)}
-                className="w-4 h-4 accent-point"
-              />
-              <span className="text-sm text-slate-500">후불</span>
-            </label>
+          )}
+
+          {/* 금액 + 후불 */}
+          <div className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-slate-100">
+            <div className="flex items-center gap-3">
+              <label className="w-14 text-sm font-medium text-slate-500 shrink-0">금액</label>
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  value={amount}
+                  onChange={handleAmountChange}
+                  placeholder="0"
+                  className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 pr-8 text-slate-800 font-semibold focus:outline-none focus:border-blue-400 select-text"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">원</span>
+              </div>
+              <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={isPostpaid}
+                  onChange={(e) => setIsPostpaid(e.target.checked)}
+                  className="w-4 h-4 accent-point"
+                />
+                <span className="text-sm text-slate-500">후불</span>
+              </label>
+            </div>
           </div>
-        </div>
 
-        {/* 에러 메시지 */}
-        {state && state.status !== 200 && (
-          <p className="text-center text-sm text-error mt-2">{state.message}</p>
-        )}
+          {/* 메모 */}
+          <div className="mx-4 mt-3 bg-white rounded-2xl px-5 py-4 border border-slate-100">
+            <label className="text-xs text-slate-400 block mb-2">메모</label>
+            <textarea
+              value={memo}
+              onChange={(e) => setMemo(e.target.value)}
+              placeholder="특이사항, 요청사항 등"
+              rows={3}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 text-sm resize-none focus:outline-none focus:border-blue-400 leading-relaxed select-text"
+            />
+          </div>
 
-        {/* 등록 버튼 */}
-        <div className="mx-4 mt-4">
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!isValid || isPending}
-            className={`
-              w-full h-14 rounded-2xl text-lg font-bold transition-all duration-150 flex items-center justify-center gap-2
-              ${isValid && !isPending
-                ? "bg-point text-white shadow-lg active:scale-95"
-                : "bg-slate-100 text-slate-300 cursor-not-allowed"
-              }
-            `}
-          >
-            {isPending ? (
-              <>
-                <Spinner size={20} />
-                저장 중...
-              </>
-            ) : (
-              "등록하기"
-            )}
-          </button>
+          {/* 에러 메시지 */}
+          {state && state.status !== 200 && (
+            <p className="text-center text-sm text-error mt-2 mx-4">{state.message}</p>
+          )}
+
+          {/* 등록 버튼 */}
+          <div className="mx-4 mt-4">
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!isValid || isPending}
+              className={`
+                w-full h-14 rounded-2xl text-lg font-bold transition-all duration-150 flex items-center justify-center gap-2
+                ${isValid && !isPending
+                  ? "bg-point text-white shadow-lg active:scale-95"
+                  : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                }
+              `}
+            >
+              {isPending ? (
+                <>
+                  <Spinner size={20} />
+                  저장 중...
+                </>
+              ) : (
+                "등록하기"
+              )}
+            </button>
+          </div>
         </div>
       </div>
 

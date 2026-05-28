@@ -80,7 +80,8 @@ model store {
 model reception {
   id           String                @id       // YYYYMMDD + 순번 (예: 20260519001)
   created_at   DateTime              @default(now()) @db.Timestamptz(6)
-  phone        String
+  phone        String?
+  name         String?
   date         String                          // YYYYMMDD
   time         String                          // HH:mm:ss
   agreed              Boolean               @default(false)

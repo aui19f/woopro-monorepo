@@ -11,7 +11,8 @@ type PaymentMethod = "CARD" | "CASH" | "TRANSFER" | "GIFT_VOUCHER" | "OTHER";
 
 export type ReceptionDetail = {
   id: string;
-  phone: string;
+  phone: string | null;
+  name: string | null;
   date: string;
   time: string;
   status: Status;
@@ -170,8 +171,17 @@ export default function ReceptionDetailView({
         </div>
 
         <div className="text-sm flex items-center gap-3">
-          <span className="text-slate-400">연락처</span>
-          <span className="text-slate-800 font-medium">{reception.phone}</span>
+          {reception.phone ? (
+            <>
+              <span className="text-slate-400">연락처</span>
+              <span className="text-slate-800 font-medium">{reception.phone}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-slate-400">이름</span>
+              <span className="text-slate-800 font-medium">{reception.name ?? "-"}</span>
+            </>
+          )}
         </div>
 
         {/* 상태 */}
