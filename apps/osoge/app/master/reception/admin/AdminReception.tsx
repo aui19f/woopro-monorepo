@@ -35,9 +35,15 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
+  const phoneInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast(2000);
 
   const [phoneDigits, setPhoneDigits] = useState("");
+  const [maskMiddle, setMaskMiddle] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const saved = localStorage.getItem("admin_mask_middle");
+    return saved === null ? false : saved === "true";
+  });
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [amount, setAmount] = useState("");
@@ -53,6 +59,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
 
   const phoneFormatted = formatPhone(phoneDigits);
   const isPhoneEntered = phoneRegex.test(phoneFormatted);
+  const phoneSaved = isPhoneEntered
+    ? (maskMiddle ? phoneFormatted.replace(/-\d{3,4}-/, "-****-") : phoneFormatted)
+    : "";
   const isValid = isPhoneEntered || name.trim().length > 0;
   const dateYYYYMMDD = isoToYYYYMMDD(selectedDate);
   const displayDate = isoToDisplay(selectedDate);
@@ -78,6 +87,10 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   };
 
   useEffect(() => {
+    phoneInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
     getCountByDate(dateYYYYMMDD).then(setCount);
   }, [dateYYYYMMDD]);
 
@@ -92,6 +105,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
       setIsPostpaid(false);
       toast.show("완료되었습니다");
       router.refresh();
+      setTimeout(() => phoneInputRef.current?.focus(), 0);
     }
   }, [state, router, toast.show]);
 
@@ -99,11 +113,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     <>
       {/* 서버 액션 hidden form */}
       <form ref={formRef} action={formAction} className="sr-only" aria-hidden>
-        <input
-          name="phone"
-          value={isPhoneEntered ? phoneFormatted : ""}
-          readOnly
-        />
+        <input name="phone" value={phoneSaved} readOnly />
         <input name="name" value={name} readOnly />
         <input name="date" value={dateYYYYMMDD} readOnly />
         <input name="amount" value={amount} readOnly />
@@ -187,11 +197,26 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
 
           {/* 전화번호 */}
           <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
-            <label className="text-xs text-slate-400 block mb-1.5">
-              전화번호{" "}
-              <span className="text-slate-300">(이름 없을 시 필수)</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs text-slate-400">
+                전화번호{" "}
+                <span className="text-slate-300">(이름 없을 시 필수)</span>
+              </label>
+              <label className="flex items-center gap-1.5 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={maskMiddle}
+                  onChange={(e) => {
+                    setMaskMiddle(e.target.checked);
+                    localStorage.setItem("admin_mask_middle", String(e.target.checked));
+                  }}
+                  className="w-3.5 h-3.5 accent-point"
+                />
+                <span className="text-xs text-slate-400">뒷자리만 저장</span>
+              </label>
+            </div>
             <input
+              ref={phoneInputRef}
               type="tel"
               inputMode="numeric"
               value={phoneDigits ? phoneFormatted : ""}
@@ -203,6 +228,11 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
                   : "border-slate-200 text-slate-400"
               }`}
             />
+            {isPhoneEntered && (
+              <p className="mt-1 text-xs text-slate-400">
+                저장: <span className="font-mono">{phoneSaved}</span>
+              </p>
+            )}
           </div>
 
           {/* 금액 + 후불 */}
@@ -245,10 +275,27 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
                 inputMode="numeric"
                 min={1}
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value || "1")}
-                className="w-24 h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-800 font-semibold text-center focus:outline-none focus:border-blue-400"
+                onChange={(e) => setQuantity(e.target.value)}
+                onBlur={(e) => { if (!e.target.value) setQuantity("1"); }}
+                className="w-20 h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-800 font-semibold text-center focus:outline-none focus:border-blue-400"
               />
               <span className="text-sm text-slate-400">개</span>
+              <div className="flex gap-1.5 ml-1">
+                {[1, 2, 3].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setQuantity(String(n))}
+                    className={`w-9 h-10 rounded-lg text-sm font-semibold transition-colors ${
+                      quantity === String(n)
+                        ? "bg-point text-white"
+                        : "bg-slate-100 text-slate-500"
+                    }`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 

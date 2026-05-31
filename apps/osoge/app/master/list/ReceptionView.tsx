@@ -244,7 +244,10 @@ export default function ReceptionView({
   })();
   const statusLabels = Array.from(localStatuses).map((s) => STATUS_LABEL[s]).join(", ");
   const filterSummary = [dateLabel, statusLabels].filter(Boolean).join(" · ");
-  const totalAmount = filtered.reduce((sum, r) => sum + (r.payment_amount ?? 0), 0);
+  const totalAmount = filtered.reduce((sum, r) => {
+    const amount = r.payment_amount ?? 0;
+    return sum + (r.status === "CANCELLED" ? -amount : amount);
+  }, 0);
 
   return (
     <div>
