@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import NavigationProgress from "./components/NavigationProgress";
 
 export const metadata: Metadata = {
   title: "오소게 | 접수시스템",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <NavigationProgress />
+        {children}
+      </body>
     </html>
   );
 }
