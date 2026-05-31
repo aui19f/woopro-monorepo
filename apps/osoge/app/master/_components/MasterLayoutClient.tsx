@@ -11,7 +11,7 @@ export default function MasterLayoutClient({
   userId: string;
 }) {
   const pathname = usePathname();
-  const isKiosk = pathname.startsWith("/master/reception");
+  const isKiosk = pathname.startsWith("/master/reception/kiosk");
 
   return (
     <>
