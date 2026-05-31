@@ -36,6 +36,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const formRef = useRef<HTMLFormElement>(null);
   const dateInputRef = useRef<HTMLInputElement>(null);
   const phoneInputRef = useRef<HTMLInputElement>(null);
+  const memoRef = useRef<HTMLTextAreaElement>(null);
   const toast = useToast(2000);
 
   const [phoneDigits, setPhoneDigits] = useState("");
@@ -60,7 +61,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const phoneFormatted = formatPhone(phoneDigits);
   const isPhoneEntered = phoneRegex.test(phoneFormatted);
   const phoneSaved = isPhoneEntered
-    ? (maskMiddle ? phoneFormatted.replace(/-\d{3,4}-/, "-****-") : phoneFormatted)
+    ? maskMiddle
+      ? phoneFormatted.replace(/-\d{3,4}-/, "-****-")
+      : phoneFormatted
     : "";
   const isValid = isPhoneEntered || name.trim().length > 0;
   const dateYYYYMMDD = isoToYYYYMMDD(selectedDate);
@@ -180,59 +183,56 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
 
         {/* 폼 */}
         <div className="mx-2 mt-2 flex flex-col gap-2">
-          {/* 이름 */}
-          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
-            <label className="text-xs text-slate-400 block mb-1.5">
-              이름{" "}
-              <span className="text-slate-300">(전화번호 없을 시 필수)</span>
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="고객 이름"
-              className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-800 text-lg font-semibold focus:outline-none focus:border-blue-400"
-            />
-          </div>
-
           {/* 전화번호 */}
           <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
+            <div className="mb-2">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="고객 이름"
+                className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 px-4 text-slate-800 text-lg font-semibold focus:outline-none focus:border-blue-400"
+              />
+            </div>
+
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs text-slate-400">
-                전화번호{" "}
-                <span className="text-slate-300">(이름 없을 시 필수)</span>
-              </label>
               <label className="flex items-center gap-1.5 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={maskMiddle}
                   onChange={(e) => {
                     setMaskMiddle(e.target.checked);
-                    localStorage.setItem("admin_mask_middle", String(e.target.checked));
+                    localStorage.setItem(
+                      "admin_mask_middle",
+                      String(e.target.checked)
+                    );
                   }}
                   className="w-3.5 h-3.5 accent-point"
                 />
                 <span className="text-xs text-slate-400">뒷자리만 저장</span>
               </label>
+              {isPhoneEntered && (
+                <p className="text-xs text-slate-400">
+                  저장: <span className="font-mono">{phoneSaved}</span>
+                </p>
+              )}
             </div>
-            <input
-              ref={phoneInputRef}
-              type="tel"
-              inputMode="numeric"
-              value={phoneDigits ? phoneFormatted : ""}
-              onChange={handlePhoneChange}
-              placeholder="010-0000-0000"
-              className={`w-full h-11 rounded-xl border bg-slate-50 px-4 text-lg font-semibold tracking-widest focus:outline-none focus:border-blue-400 ${
-                isPhoneEntered
-                  ? "border-slate-200 text-slate-800"
-                  : "border-slate-200 text-slate-400"
-              }`}
-            />
-            {isPhoneEntered && (
-              <p className="mt-1 text-xs text-slate-400">
-                저장: <span className="font-mono">{phoneSaved}</span>
-              </p>
-            )}
+
+            <div className="flex gap-2">
+              <input
+                ref={phoneInputRef}
+                type="tel"
+                inputMode="numeric"
+                value={phoneDigits ? phoneFormatted : ""}
+                onChange={handlePhoneChange}
+                placeholder="010-0000-0000"
+                className={`w-full h-11 rounded-xl border bg-slate-50 px-4 text-lg font-semibold tracking-widest focus:outline-none focus:border-blue-400 ${
+                  isPhoneEntered
+                    ? "border-slate-200 text-slate-800"
+                    : "border-slate-200 text-slate-400"
+                }`}
+              />
+            </div>
           </div>
 
           {/* 금액 + 후불 */}
@@ -266,22 +266,26 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             </div>
           </div>
 
-          {/* 맡긴 수량 */}
+          {/* 수량 */}
           <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
-            <div className="flex items-center gap-3">
-              <label className="w-16 text-sm font-medium text-slate-500 shrink-0">맡긴 수량</label>
+            <div className="flex items-center gap-2">
+              <label className="w-10 text-sm font-medium text-slate-500 shrink-0">
+                수량
+              </label>
               <input
                 type="number"
                 inputMode="numeric"
                 min={1}
                 value={quantity}
                 onChange={(e) => setQuantity(e.target.value)}
-                onBlur={(e) => { if (!e.target.value) setQuantity("1"); }}
-                className="w-20 h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-800 font-semibold text-center focus:outline-none focus:border-blue-400"
+                onBlur={(e) => {
+                  if (!e.target.value) setQuantity("1");
+                }}
+                className="w-16 h-10 rounded-lg border border-slate-200 bg-slate-50 px-2 text-slate-800 font-semibold text-center focus:outline-none focus:border-blue-400"
               />
               <span className="text-sm text-slate-400">개</span>
-              <div className="flex gap-1.5 ml-1">
-                {[1, 2, 3].map((n) => (
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((n) => (
                   <button
                     key={n}
                     type="button"
@@ -303,12 +307,50 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
           <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
             <label className="text-xs text-slate-400 block mb-2">메모</label>
             <textarea
+              ref={memoRef}
               value={memo}
               onChange={(e) => setMemo(e.target.value)}
               placeholder="특이사항, 요청사항 등"
               rows={3}
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-800 text-sm resize-none focus:outline-none focus:border-blue-400 leading-relaxed"
             />
+            <div className="flex flex-col gap-1.5 mt-2">
+              {[
+                [
+                  "바지",
+                  "청바지",
+                  "슬렉스",
+                  "치마",
+                  "원피스",
+                  "티셔츠",
+
+                  "니트",
+                  "남방",
+                  "자켓",
+                  "마이",
+                  "코트",
+                ],
+                ["기장", "워싱", "총장", "허리", "힙", "통", "품", "어깨"],
+                ["+", "-", "*", "cm", `"(인치)`, "1단", "단", "&"],
+                ["봉탈", "누빔", "지퍼", "똑딱이", "후크", "단추", "교체"],
+              ].map((row, i) => (
+                <div key={i} className="flex gap-1.5 flex-wrap">
+                  {row.map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        setMemo((prev) => (prev ? `${prev} ${tag}` : tag));
+                        memoRef.current?.focus();
+                      }}
+                      className="px-2.5 h-8 rounded-lg bg-slate-100 text-slate-600 text-sm font-medium hover:bg-slate-200 active:bg-slate-300 transition-colors"
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* 에러 */}

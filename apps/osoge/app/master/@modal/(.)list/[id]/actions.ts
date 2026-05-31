@@ -11,6 +11,7 @@ import {
 import { sendCompletionMessage } from "@/services/message";
 
 export type DetailSaveData = {
+  date: string;
   status: EnumReceptionStatus;
   paymentTiming: EnumPaymentTiming | null;
   paymentMethod: EnumPaymentMethod | null;
@@ -30,6 +31,7 @@ export async function saveDetail(id: string, data: DetailSaveData): Promise<void
   const userId = await getCurrentUserId();
 
   await updateReceptionDetail(id, {
+    date: data.date || undefined,
     status: data.status,
     payment_timing: data.paymentTiming,
     payment_method: data.paymentMethod,
@@ -44,6 +46,7 @@ export async function sendAndSaveDetail(id: string, data: DetailSaveData): Promi
   const userId = await getCurrentUserId();
 
   await updateReceptionDetail(id, {
+    date: data.date || undefined,
     status: data.status,
     payment_timing: data.paymentTiming,
     payment_method: data.paymentMethod,

@@ -24,6 +24,7 @@ export default function ReceptionDetailModal({
         <ReceptionDetailView
           reception={reception}
           onClose={() => router.back()}
+          onSaved={() => { router.refresh(); router.back(); }}
           mode="modal"
         />
       </div>

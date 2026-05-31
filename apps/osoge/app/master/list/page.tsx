@@ -89,10 +89,15 @@ export default async function ReceptionsPage({
     .split(",")
     .filter((s) => VALID_STATUSES.has(s)) as EnumReceptionStatus[];
 
+  const sortField = params.sort === "date" ? "date" : "created";
+  const sortDir   = params.order === "asc"  ? "asc"  : "desc";
+
   const receptions = await findReceptions({
     fromDate,
     toDate,
     status: statusFilter.length ? statusFilter : undefined,
+    sortField,
+    sortDir,
   });
 
   return (
@@ -105,6 +110,8 @@ export default async function ReceptionsPage({
         toWeek={toWeek}
         fromMonth={fromMonth}
         statusParam={statusParam}
+        sortField={sortField}
+        sortDir={sortDir}
       />
     </main>
   );

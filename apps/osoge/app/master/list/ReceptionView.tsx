@@ -164,6 +164,8 @@ export default function ReceptionView({
   toWeek,
   fromMonth,
   statusParam,
+  sortField,
+  sortDir,
 }: {
   receptions: ReceptionItem[];
   dateFilter: string;
@@ -171,6 +173,8 @@ export default function ReceptionView({
   toWeek: string;
   fromMonth: string;
   statusParam: string;
+  sortField: "date" | "created";
+  sortDir: "asc" | "desc";
 }) {
   const router = useRouter();
   const [search, setSearch] = useState("");
@@ -185,6 +189,8 @@ export default function ReceptionView({
   const [localStatuses, setLocalStatuses] = useState<Set<ReceptionStatus>>(
     () => new Set(statusParam.split(",").filter(Boolean) as ReceptionStatus[])
   );
+  const [localSortField, setLocalSortField] = useState<"date" | "created">(sortField);
+  const [localSortDir,   setLocalSortDir]   = useState<"asc" | "desc">(sortDir);
 
   function applyFilters() {
     const url = new URL(window.location.href);
@@ -205,6 +211,9 @@ export default function ReceptionView({
     const statusStr = Array.from(localStatuses).join(",");
     if (statusStr) url.searchParams.set("status", statusStr);
     else url.searchParams.delete("status");
+
+    url.searchParams.set("sort",  localSortField);
+    url.searchParams.set("order", localSortDir);
 
     router.push(url.pathname + url.search);
   }
@@ -335,6 +344,32 @@ export default function ReceptionView({
           {localDateFilter === "custom" && (
             <MonthPicker value={localMonth} onChange={setLocalMonth} />
           )}
+
+          {/* 정렬 */}
+          <div className="flex gap-2 items-center flex-wrap">
+            <select
+              value={localSortField}
+              onChange={(e) => setLocalSortField(e.target.value as "date" | "created")}
+              className="text-sm border border-slate-200 rounded-lg h-9 px-2 focus:outline-none focus:border-blue-400"
+            >
+              <option value="created">입력날짜</option>
+              <option value="date">접수날짜</option>
+            </select>
+            {(["desc", "asc"] as const).map((dir) => (
+              <button
+                key={dir}
+                type="button"
+                onClick={() => setLocalSortDir(dir)}
+                className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  localSortDir === dir
+                    ? "bg-slate-700 text-white"
+                    : "bg-white border border-slate-200 text-slate-600"
+                }`}
+              >
+                {dir === "desc" ? "최신순" : "오래된순"}
+              </button>
+            ))}
+          </div>
 
           {/* 상태 필터 */}
           <div className="flex gap-2 flex-wrap">

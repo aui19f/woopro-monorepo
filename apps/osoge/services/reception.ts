@@ -24,7 +24,13 @@ export async function findReceptions(params: {
   toDate?: string;             // YYYYMMDD
   status?: EnumReceptionStatus[];
   storeId?: string;
+  sortField?: "date" | "created";
+  sortDir?: "asc" | "desc";
 }) {
+  const field  = params.sortField ?? "created";
+  const dir    = params.sortDir   ?? "desc";
+  const orderBy = field === "date" ? { date: dir } : { created_at: dir };
+
   return prisma.reception.findMany({
     where: {
       ...(params.fromDate || params.toDate
@@ -38,7 +44,7 @@ export async function findReceptions(params: {
       ...(params.status?.length ? { status: { in: params.status } } : {}),
       ...(params.storeId ? { storeId: params.storeId } : {}),
     },
-    orderBy: { id: "desc" },
+    orderBy,
   });
 }
 
@@ -105,6 +111,7 @@ export async function createAdminReception(data: {
 export async function updateReceptionDetail(
   id: string,
   data: {
+    date?: string;
     status?: EnumReceptionStatus;
     payment_amount?: number | null;
     payment_timing?: EnumPaymentTiming | null;

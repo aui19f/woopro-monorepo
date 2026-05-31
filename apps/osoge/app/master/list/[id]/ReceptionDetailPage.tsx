@@ -16,6 +16,7 @@ export default function ReceptionDetailPage({
         <ReceptionDetailView
           reception={reception}
           onClose={() => router.push("/master/list")}
+          onSaved={() => { router.refresh(); router.push("/master/list"); }}
           mode="page"
         />
       </div>
