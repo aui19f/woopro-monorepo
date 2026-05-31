@@ -162,7 +162,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             <input
               type="tel"
               inputMode="numeric"
-              value={phoneFormatted === "010" ? "" : phoneFormatted}
+              value={phoneDigits ? phoneFormatted : ""}
               onChange={handlePhoneChange}
               placeholder="010-0000-0000"
               className={`w-full h-11 rounded-xl border bg-slate-50 px-4 text-lg font-semibold tracking-widest focus:outline-none focus:border-blue-400 ${
