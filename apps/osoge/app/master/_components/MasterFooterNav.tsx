@@ -24,6 +24,14 @@ const ListIcon = ({ active }: { active: boolean }) => (
   </svg>
 );
 
+const ExpenseIcon = ({ active }: { active: boolean }) => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 1.8} strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2" fill={active ? "currentColor" : "none"} />
+    <path d="M2 10h20" stroke={active ? "white" : "currentColor"} />
+    <path d="M6 15h4M14 15h4" stroke={active ? "white" : "currentColor"} />
+  </svg>
+);
+
 const MyPageIcon = ({ active }: { active: boolean }) => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={active ? 2.5 : 1.8} strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="8" r="4" fill={active ? "currentColor" : "none"} />
@@ -32,10 +40,11 @@ const MyPageIcon = ({ active }: { active: boolean }) => (
 );
 
 const NAV_ITEMS = (userId: string) => [
-  { label: "홈",      href: "/master",            Icon: HomeIcon },
-  { label: "접수하기", href: "/master/reception",  Icon: ReceptionIcon },
-  { label: "리스트",   href: "/master/list",       Icon: ListIcon },
-  { label: "마이페이지", href: `/master/${userId}`, Icon: MyPageIcon },
+  { label: "홈",       href: "/master",             Icon: HomeIcon },
+  { label: "접수하기",  href: "/master/reception",   Icon: ReceptionIcon },
+  { label: "리스트",    href: "/master/list",        Icon: ListIcon },
+  { label: "지출",      href: "/master/expense",     Icon: ExpenseIcon },
+  { label: "마이페이지", href: `/master/${userId}`,   Icon: MyPageIcon },
 ];
 
 export default function MasterFooterNav({ userId }: { userId: string }) {
