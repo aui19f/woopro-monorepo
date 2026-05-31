@@ -40,6 +40,13 @@ enum EnumPaymentMethod {
   OTHER        // 그 외
 }
 
+enum EnumExpenseMethod {
+  CARD  // 카드
+  CASH  // 현금
+  PAY   // 페이
+  OTHER // 그외
+}
+
 model plan {
   id           String  @id @default(uuid())
   name         String  @unique
@@ -105,4 +112,16 @@ model reception {
   storeId String? // 임시: store 개발 전까지 로그인 사용자 ID 저장
 
   @@map("reception")
+}
+
+model expense {
+  id         String            @id @default(cuid())
+  created_at DateTime          @default(now()) @db.Timestamptz(6)
+  date       String            // YYYYMMDD
+  amount     Int
+  method     EnumExpenseMethod
+  memo       String?
+  storeId    String?
+
+  @@map("expense")
 }
