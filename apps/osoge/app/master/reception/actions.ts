@@ -125,7 +125,7 @@ export async function adminRegisterReception(
       name: name?.trim() || undefined,
       date,
       time,
-      quantity: 1,
+      quantity: Math.max(1, parseInt(formData.get("quantity") as string) || 1),
       payment_amount,
       payment_timing,
       memo,

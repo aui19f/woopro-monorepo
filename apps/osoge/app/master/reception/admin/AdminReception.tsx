@@ -7,7 +7,11 @@ import { phoneRegex } from "@repo/schemas/regex";
 import Spinner from "@repo/ui/components/Spinner/Spinner";
 import Toast from "@repo/ui/components/Toast/Toast";
 import { useToast } from "@repo/ui/hooks/useToast";
-import { adminRegisterReception, getCountByDate, type ReceptionState } from "../actions";
+import {
+  adminRegisterReception,
+  getCountByDate,
+  type ReceptionState,
+} from "../actions";
 
 interface Props {
   todayCount: number;
@@ -35,16 +39,17 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
 
   const [phoneDigits, setPhoneDigits] = useState("");
   const [name, setName] = useState("");
+  const [quantity, setQuantity] = useState("1");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
   const [isPostpaid, setIsPostpaid] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const [count, setCount] = useState(todayCount);
 
-  const [state, formAction, isPending] = useActionState<ReceptionState, FormData>(
-    adminRegisterReception,
-    null
-  );
+  const [state, formAction, isPending] = useActionState<
+    ReceptionState,
+    FormData
+  >(adminRegisterReception, null);
 
   const phoneFormatted = formatPhone(phoneDigits);
   const isPhoneEntered = phoneRegex.test(phoneFormatted);
@@ -81,6 +86,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
       setCount((c) => c + 1);
       setPhoneDigits("");
       setName("");
+      setQuantity("1");
       setAmount("");
       setMemo("");
       setIsPostpaid(false);
@@ -93,27 +99,50 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     <>
       {/* 서버 액션 hidden form */}
       <form ref={formRef} action={formAction} className="sr-only" aria-hidden>
-        <input name="phone" value={isPhoneEntered ? phoneFormatted : ""} readOnly />
+        <input
+          name="phone"
+          value={isPhoneEntered ? phoneFormatted : ""}
+          readOnly
+        />
         <input name="name" value={name} readOnly />
         <input name="date" value={dateYYYYMMDD} readOnly />
         <input name="amount" value={amount} readOnly />
-        <input name="paymentTiming" value={isPostpaid ? "POSTPAID" : "PREPAID"} readOnly />
+        <input
+          name="paymentTiming"
+          value={isPostpaid ? "POSTPAID" : "PREPAID"}
+          readOnly
+        />
+        <input name="quantity" value={quantity} readOnly />
         <textarea name="memo" value={memo} readOnly />
       </form>
 
       <div className="min-h-screen bg-slate-50 pb-10">
-
         {/* 헤더 */}
-        <div className="flex items-center justify-between px-5 pt-5 pb-4 bg-white border-b border-slate-100 sticky top-0 z-10">
+        <div className="flex items-center justify-between py-2 px-4 bg-white border-b border-slate-100 sticky top-0 z-10">
           <div>
-            <p className="text-xs text-slate-400 font-medium">관리자 접수 모드</p>
+            <p className="text-xs text-slate-400 font-medium">
+              관리자 접수 모드
+            </p>
             <div
               className="relative mt-0.5 cursor-pointer"
-              onClick={() => dateInputRef.current?.showPicker?.() ?? dateInputRef.current?.click()}
+              onClick={() =>
+                dateInputRef.current?.showPicker?.() ??
+                dateInputRef.current?.click()
+              }
             >
               <p className="font-semibold text-slate-700 flex items-center gap-1.5 pr-1">
                 {displayDate}
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" className="text-slate-400">
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-slate-400"
+                >
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                 </svg>
@@ -132,18 +161,20 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             <p className="text-xs text-slate-400">접수</p>
             <p className="text-2xl font-bold text-point">
               {count}
-              <span className="text-sm font-normal text-slate-400 ml-1">건</span>
+              <span className="text-sm font-normal text-slate-400 ml-1">
+                건
+              </span>
             </p>
           </div>
         </div>
 
         {/* 폼 */}
-        <div className="mx-4 mt-5 flex flex-col gap-4">
-
+        <div className="mx-2 mt-2 flex flex-col gap-2">
           {/* 이름 */}
-          <div className="bg-white rounded-2xl px-5 py-4 border border-slate-100">
+          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
             <label className="text-xs text-slate-400 block mb-1.5">
-              이름 <span className="text-slate-300">(전화번호 없을 시 필수)</span>
+              이름{" "}
+              <span className="text-slate-300">(전화번호 없을 시 필수)</span>
             </label>
             <input
               type="text"
@@ -155,9 +186,10 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
           </div>
 
           {/* 전화번호 */}
-          <div className="bg-white rounded-2xl px-5 py-4 border border-slate-100">
+          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
             <label className="text-xs text-slate-400 block mb-1.5">
-              전화번호 <span className="text-slate-300">(이름 없을 시 필수)</span>
+              전화번호{" "}
+              <span className="text-slate-300">(이름 없을 시 필수)</span>
             </label>
             <input
               type="tel"
@@ -166,15 +198,19 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
               onChange={handlePhoneChange}
               placeholder="010-0000-0000"
               className={`w-full h-11 rounded-xl border bg-slate-50 px-4 text-lg font-semibold tracking-widest focus:outline-none focus:border-blue-400 ${
-                isPhoneEntered ? "border-slate-200 text-slate-800" : "border-slate-200 text-slate-400"
+                isPhoneEntered
+                  ? "border-slate-200 text-slate-800"
+                  : "border-slate-200 text-slate-400"
               }`}
             />
           </div>
 
           {/* 금액 + 후불 */}
-          <div className="bg-white rounded-2xl px-5 py-4 border border-slate-100">
+          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
             <div className="flex items-center gap-3">
-              <label className="w-14 text-sm font-medium text-slate-500 shrink-0">금액</label>
+              <label className="w-14 text-sm font-medium text-slate-500 shrink-0">
+                금액
+              </label>
               <div className="flex-1 relative">
                 <input
                   type="text"
@@ -184,7 +220,9 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
                   placeholder="0"
                   className="w-full h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 pr-8 text-slate-800 font-semibold focus:outline-none focus:border-blue-400"
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">원</span>
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">
+                  원
+                </span>
               </div>
               <label className="flex items-center gap-1.5 cursor-pointer shrink-0">
                 <input
@@ -198,8 +236,24 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             </div>
           </div>
 
+          {/* 맡긴 수량 */}
+          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
+            <div className="flex items-center gap-3">
+              <label className="w-16 text-sm font-medium text-slate-500 shrink-0">맡긴 수량</label>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value || "1")}
+                className="w-24 h-10 rounded-lg border border-slate-200 bg-slate-50 px-3 text-slate-800 font-semibold text-center focus:outline-none focus:border-blue-400"
+              />
+              <span className="text-sm text-slate-400">개</span>
+            </div>
+          </div>
+
           {/* 메모 */}
-          <div className="bg-white rounded-2xl px-5 py-4 border border-slate-100">
+          <div className="bg-white rounded-2xl px-4 py-2 border border-slate-100">
             <label className="text-xs text-slate-400 block mb-2">메모</label>
             <textarea
               value={memo}
@@ -222,9 +276,10 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             disabled={!isValid || isPending}
             className={`
               w-full h-14 rounded-2xl text-lg font-bold transition-all duration-150 flex items-center justify-center gap-2
-              ${isValid && !isPending
-                ? "bg-point text-white shadow-lg active:scale-95"
-                : "bg-slate-100 text-slate-300 cursor-not-allowed"
+              ${
+                isValid && !isPending
+                  ? "bg-point text-white shadow-lg active:scale-95"
+                  : "bg-slate-100 text-slate-300 cursor-not-allowed"
               }
             `}
           >
