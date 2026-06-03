@@ -1,7 +1,7 @@
 "use client";
 
 import "react-easy-crop/react-easy-crop.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Cropper from "react-easy-crop";
 import type { Area, Point } from "react-easy-crop";
 import { getCroppedBlob } from "./cropUtils";
@@ -21,21 +21,23 @@ export default function ImageEditModal({ imageSrc, onConfirm, onCancel }: Props)
   const [croppedArea, setCroppedArea] = useState<Area | null>(null);
   const [processing, setProcessing]   = useState(false);
 
-  // 브라우저 뒤로가기 가로채기
+  // 최신 onCancel을 ref로 유지 — effect 재실행 없이 최신 함수 참조
+  const onCancelRef = useRef(onCancel);
+  useEffect(() => { onCancelRef.current = onCancel; });
+
+  // 뒤로가기 가로채기 — 마운트 시 1회만 실행
   useEffect(() => {
     history.pushState({ imageEdit: true }, "");
-    const onPop = (e: PopStateEvent) => {
-      if (e.state?.imageEdit) return;
+
+    const onPop = () => {
+      // 뒤로가기가 감지되면 상태를 다시 push해 실제 이탈을 막고 취소 처리
       history.pushState({ imageEdit: true }, "");
-      onCancel();
+      onCancelRef.current();
     };
+
     window.addEventListener("popstate", onPop);
-    return () => {
-      window.removeEventListener("popstate", onPop);
-      // 뒤로가기 없이 닫힐 때 pushState 제거
-      if (history.state?.imageEdit) history.back();
-    };
-  }, [onCancel]);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []); // 빈 deps — cleanup 에서 history.back() 호출 없음
 
   const onCropComplete = useCallback((_: Area, pixels: Area) => {
     setCroppedArea(pixels);
@@ -53,12 +55,9 @@ export default function ImageEditModal({ imageSrc, onConfirm, onCancel }: Props)
   }
 
   return (
-    <div className="fixed inset-0 z-200 bg-black">
-      {/* 크로퍼 컨테이너: absolute로 남은 공간 채움 */}
-      <div
-        className="absolute inset-x-0 top-0"
-        style={{ bottom: CONTROLS_H }}
-      >
+    <div className="fixed inset-0 bg-black" style={{ zIndex: 9999 }}>
+      {/* 크로퍼 */}
+      <div className="absolute inset-x-0 top-0" style={{ bottom: CONTROLS_H }}>
         <Cropper
           image={imageSrc}
           crop={crop}

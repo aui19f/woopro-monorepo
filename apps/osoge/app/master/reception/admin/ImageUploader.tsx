@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { compressToWebP } from "./cropUtils";
 import ImageEditModal from "./ImageEditModal";
@@ -49,10 +49,12 @@ export default function ImageUploader({ images, onChange, maxCount = 10 }: Props
     onChange([...images, { previewUrl: URL.createObjectURL(compressed), blob: compressed }]);
   }
 
-  function handleCancel() {
-    if (editTarget) URL.revokeObjectURL(editTarget.src);
-    setEditTarget(null);
-  }
+  const handleCancel = useCallback(() => {
+    setEditTarget((prev) => {
+      if (prev) URL.revokeObjectURL(prev.src);
+      return null;
+    });
+  }, []);
 
   function removeImage(idx: number) {
     const img = images[idx];
