@@ -12,6 +12,8 @@ import {
   getCountByDate,
   type ReceptionState,
 } from "../actions";
+import ImageUploader, { type StagedImage } from "./ImageUploader";
+import { uploadReceptionImage } from "@/lib/storage";
 
 interface Props {
   todayCount: number;
@@ -52,6 +54,8 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
   const [isPostpaid, setIsPostpaid] = useState(false);
   const [selectedDate, setSelectedDate] = useState(todayISO);
   const [count, setCount] = useState(todayCount);
+  const [stagedImages, setStagedImages] = useState<StagedImage[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const [state, formAction, isPending] = useActionState<
     ReceptionState,
@@ -85,8 +89,24 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
     setSelectedDate(e.target.value);
   };
 
-  const handleSubmit = () => {
-    formRef.current?.requestSubmit();
+  const handleSubmit = async () => {
+    if (!isValid || isPending || isUploading) return;
+    setIsUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const img of stagedImages) {
+        const { url } = await uploadReceptionImage(img.blob, dateYYYYMMDD);
+        urls.push(url);
+      }
+      // 숨김 폼에서 FormData 수집 후 이미지 URL 추가
+      const fd = new FormData(formRef.current!);
+      urls.forEach((u) => fd.append("images", u));
+      formAction(fd);
+    } catch (e) {
+      console.error("이미지 업로드 실패", e);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   useEffect(() => {
@@ -106,6 +126,7 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
       setAmount("");
       setMemo("");
       setIsPostpaid(false);
+      setStagedImages([]);
       toast.show("완료되었습니다");
       router.refresh();
       setTimeout(() => phoneInputRef.current?.focus(), 0);
@@ -353,6 +374,12 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
             </div>
           </div>
 
+          {/* 이미지 */}
+          <div className="bg-white rounded-2xl px-4 py-3 border border-slate-100">
+            <label className="text-xs text-slate-400 block mb-1">사진</label>
+            <ImageUploader images={stagedImages} onChange={setStagedImages} />
+          </div>
+
           {/* 에러 */}
           {state && state.status !== 200 && (
             <p className="text-center text-sm text-error">{state.message}</p>
@@ -362,20 +389,20 @@ export default function AdminReception({ todayCount, todayISO }: Props) {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={!isValid || isPending}
+            disabled={!isValid || isPending || isUploading}
             className={`
               w-full h-14 rounded-2xl text-lg font-bold transition-all duration-150 flex items-center justify-center gap-2
               ${
-                isValid && !isPending
+                isValid && !isPending && !isUploading
                   ? "bg-point text-white shadow-lg active:scale-95"
                   : "bg-slate-100 text-slate-300 cursor-not-allowed"
               }
             `}
           >
-            {isPending ? (
+            {isPending || isUploading ? (
               <>
                 <Spinner size={20} />
-                저장 중...
+                {isUploading ? "업로드 중..." : "저장 중..."}
               </>
             ) : (
               "등록하기"

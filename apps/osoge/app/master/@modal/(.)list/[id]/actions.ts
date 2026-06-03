@@ -9,6 +9,7 @@ import {
   type EnumPaymentMethod,
 } from "@/services/reception";
 import { sendCompletionMessage } from "@/services/message";
+import { deleteAllReceptionImages } from "./imageActions";
 
 export type DetailSaveData = {
   date: string;
@@ -29,6 +30,10 @@ async function getCurrentUserId(): Promise<string | null> {
 
 export async function saveDetail(id: string, data: DetailSaveData): Promise<void> {
   const userId = await getCurrentUserId();
+
+  if (data.status === "DONE" || data.status === "CANCELLED") {
+    await deleteAllReceptionImages(id);
+  }
 
   await updateReceptionDetail(id, {
     date: data.date || undefined,

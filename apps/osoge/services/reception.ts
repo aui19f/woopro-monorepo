@@ -104,6 +104,7 @@ export async function createAdminReception(data: {
   payment_timing?: EnumPaymentTiming;
   memo?: string;
   storeId?: string;
+  images?: string[];
 }) {
   return prisma.reception.create({ data: { ...data, agreed: true } });
 }

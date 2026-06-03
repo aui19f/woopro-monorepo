@@ -97,7 +97,8 @@ export async function adminRegisterReception(
     rawTiming === "PREPAID" || rawTiming === "POSTPAID"
       ? (rawTiming as EnumPaymentTiming)
       : undefined;
-  const memo = (formData.get("memo") as string) || undefined;
+  const memo   = (formData.get("memo") as string) || undefined;
+  const images = formData.getAll("images").filter(Boolean) as string[];
 
   const adminPhoneRegex = /^\d{3}-(\d{3,4}|\*{4})-\d{4}$/;
 
@@ -129,6 +130,7 @@ export async function adminRegisterReception(
       payment_amount,
       payment_timing,
       memo,
+      images: images.length ? images : undefined,
     });
     return { status: 200, message: "성공" };
   } catch (error) {

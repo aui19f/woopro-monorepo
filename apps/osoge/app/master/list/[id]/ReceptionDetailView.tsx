@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Input from "@repo/ui/components/forms/input/Input";
 import Checkbox from "@repo/ui/components/forms/Checkbox/Checkbox";
 import { saveDetail, sendAndSaveDetail } from "@/app/master/@modal/(.)list/[id]/actions";
+import { deleteReceptionImage } from "@/app/master/@modal/(.)list/[id]/imageActions";
 
 type Status = "READY" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 type PaymentTiming = "PREPAID" | "POSTPAID";
@@ -22,6 +23,7 @@ export type ReceptionDetail = {
   payment_method: PaymentMethod | null;
   quantity: number;
   memo: string | null;
+  images: string[];
 };
 
 const STATUS_TABS: { value: Status; label: string; active: string }[] = [
@@ -96,6 +98,8 @@ export default function ReceptionDetailView({
   const [paymentAmount, setPaymentAmount] = useState(reception.payment_amount?.toString() ?? "");
   const [sendMessage, setSendMessage] = useState(false);
   const [memo, setMemo] = useState(reception.memo ?? "");
+  const [images, setImages] = useState<string[]>(reception.images);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   const displayAmount = paymentAmount
     ? Number(paymentAmount).toLocaleString("ko-KR")
@@ -310,7 +314,71 @@ export default function ReceptionDetailView({
             className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-blue-400 resize-none"
           />
         </Section>
+
+        {/* 사진 */}
+        {images.length > 0 && (
+          <Section label="사진">
+            <div className="flex flex-wrap gap-2">
+              {images.map((url, idx) => (
+                <div key={url} className="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt=""
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setLightboxIdx(idx)}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!confirm("이 사진을 삭제하시겠어요?")) return;
+                      await deleteReceptionImage(reception.id, url);
+                      setImages((prev) => prev.filter((u) => u !== url));
+                    }}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center text-xs"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </Section>
+        )}
       </div>
+
+      {/* 라이트박스 */}
+      {lightboxIdx !== null && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center"
+          onClick={() => setLightboxIdx(null)}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={images[lightboxIdx]}
+            alt=""
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            className="absolute top-4 right-4 text-white text-2xl w-10 h-10 flex items-center justify-center"
+            onClick={() => setLightboxIdx(null)}
+          >
+            ✕
+          </button>
+          {images.length > 1 && (
+            <>
+              <button
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-3xl w-10 h-10 flex items-center justify-center"
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => ((i ?? 0) - 1 + images.length) % images.length); }}
+              >‹</button>
+              <button
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl w-10 h-10 flex items-center justify-center"
+                onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => ((i ?? 0) + 1) % images.length); }}
+              >›</button>
+            </>
+          )}
+        </div>
+      )}
 
       {/* 푸터 */}
       <div className="flex items-center justify-between px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 shrink-0 bg-white">
