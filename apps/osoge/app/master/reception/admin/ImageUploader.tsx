@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { compressToWebP } from "./cropUtils";
 import ImageEditModal from "./ImageEditModal";
 
@@ -15,6 +16,9 @@ interface Props {
 export default function ImageUploader({ images, onChange, maxCount = 10 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editTarget, setEditTarget] = useState<{ src: string; origBlob: Blob } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
 
   // 클립보드 붙여넣기
   useEffect(() => {
@@ -27,25 +31,22 @@ export default function ImageUploader({ images, onChange, maxCount = 10 }: Props
     };
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images.length, maxCount]);
 
   function openEditor(file: File | Blob) {
     if (images.length >= maxCount) return;
-    const src = URL.createObjectURL(file);
-    const blob = file instanceof File ? file : file;
-    setEditTarget({ src, origBlob: blob });
+    setEditTarget({ src: URL.createObjectURL(file), origBlob: file });
   }
 
   async function handleConfirm(blob: Blob) {
-    // "편집 없이 추가" 일 때는 origBlob 사용
     const target = editTarget!;
     const rawBlob = blob.size === 0 ? target.origBlob : blob;
     setEditTarget(null);
     URL.revokeObjectURL(target.src);
 
     const compressed = await compressToWebP(rawBlob);
-    const previewUrl = URL.createObjectURL(compressed);
-    onChange([...images, { previewUrl, blob: compressed }]);
+    onChange([...images, { previewUrl: URL.createObjectURL(compressed), blob: compressed }]);
   }
 
   function handleCancel() {
@@ -61,7 +62,6 @@ export default function ImageUploader({ images, onChange, maxCount = 10 }: Props
 
   return (
     <>
-      {/* 썸네일 + 추가 버튼 */}
       <div className="flex flex-wrap gap-2 mt-2">
         {images.map((img, idx) => (
           <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-200">
@@ -94,30 +94,33 @@ export default function ImageUploader({ images, onChange, maxCount = 10 }: Props
       </div>
 
       <p className="mt-1 text-xs text-slate-400">
-        클립보드에서 붙여넣기(Ctrl+V)도 가능합니다 · {images.length}/{maxCount}장
+        클립보드 붙여넣기(Ctrl+V) 가능 · {images.length}/{maxCount}장
       </p>
 
+      {/* capture 없이 렌더링 — 데스크톱에서도 파일 피커 열리도록 */}
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         multiple
         className="hidden"
         onChange={(e) => {
-          const files = Array.from(e.target.files ?? []);
-          files.forEach((f) => openEditor(f));
+          Array.from(e.target.files ?? []).forEach((f) => openEditor(f));
           e.target.value = "";
         }}
       />
 
-      {editTarget && (
-        <ImageEditModal
-          imageSrc={editTarget.src}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
-      )}
+      {/* 편집 모달: document.body에 포털로 마운트 → z-index/overflow 영향 없음 */}
+      {mounted && editTarget &&
+        createPortal(
+          <ImageEditModal
+            imageSrc={editTarget.src}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+          />,
+          document.body
+        )
+      }
     </>
   );
 }
